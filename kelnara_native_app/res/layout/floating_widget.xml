@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root_floating"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/card_dark"
+    android:padding="10dp">
+
+    <!-- Header / Drag Bar -->
+    <LinearLayout
+        android:id="@+id/drag_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚔️ KELNARA BOT"
+            android:textColor="@color/brand_gold"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text=" (Geser)"
+            android:textColor="@color/text_gray"
+            android:textSize="9sp"
+            android:layout_marginStart="3dp" />
+
+        <TextView
+            android:id="@+id/btn_close_float"
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:text="✕"
+            android:textColor="@color/brand_red"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tv_float_status"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Status: IDLE (Siap)"
+        android:textColor="@color/brand_cyan"
+        android:textSize="10sp"
+        android:gravity="center"
+        android:layout_marginTop="4dp" />
+
+    <!-- Action Buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
+
+        <Button
+            android:id="@+id/btn_float_toggle"
+            android:layout_width="85dp"
+            android:layout_height="36dp"
+            android:text="▶ MULAI"
+            android:textSize="11sp"
+            android:textColor="@color/text_white"
+            android:textStyle="bold"
+            android:backgroundTint="@color/brand_emerald" />
+
+        <Button
+            android:id="@+id/btn_float_hide"
+            android:layout_width="85dp"
+            android:layout_height="36dp"
+            android:text="Minimize"
+            android:textSize="11sp"
+            android:textColor="@color/text_white"
+            android:backgroundTint="#334155"
+            android:layout_marginStart="6dp" />
+    </LinearLayout>
+</LinearLayout>

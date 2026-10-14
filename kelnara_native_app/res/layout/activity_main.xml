@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_dark"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Header App -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚔️"
+                android:textSize="28sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="KELNARA BOT CoC"
+                    android:textColor="@color/brand_gold"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Smart Farming, Easy Progress"
+                    android:textColor="@color/text_gray"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PRO"
+                android:textColor="@color/brand_gold"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:padding="4dp" />
+        </LinearLayout>
+
+        <!-- Village Profile Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/card_dark"
+            android:padding="14dp"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🏰 HAHAHAA BURUH PABRIK (TH13)"
+                android:textColor="@color/text_white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Level 158 • Champion III • 5/5 Builder Aktif"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp"
+                android:layout_marginTop="3dp" />
+        </LinearLayout>
+
+        <!-- Big Launch Floating Widget Button -->
+        <Button
+            android:id="@+id/btn_launch_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:text="🚀 LUNCURKAN FLOATING WIDGET (OVERLAY)"
+            android:textColor="@color/text_white"
+            android:textStyle="bold"
+            android:textSize="13sp"
+            android:backgroundTint="@color/brand_emerald" />
+
+        <!-- Permission Indicators -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp">
+
+            <Button
+                android:id="@+id/btn_perm_overlay"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="1. Izin Overlay"
+                android:textSize="11sp"
+                android:textColor="@color/text_white"
+                android:backgroundTint="@color/card_dark" />
+
+            <Button
+                android:id="@+id/btn_perm_accessibility"
+                android:layout_width="0dp"
+                android:layout_height="40dp"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="2. Aksesibilitas"
+                android:textSize="11sp"
+                android:textColor="@color/text_white"
+                android:backgroundTint="@color/card_dark" />
+        </LinearLayout>
+
+        <!-- Farming Settings Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/card_dark"
+            android:padding="14dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🎯 Ambang Batas Loot (Scouting Next)"
+                android:textColor="@color/brand_gold"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="Min Gold (k):"
+                    android:textColor="@color/text_white"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/et_min_gold"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="350"
+                    android:inputType="number"
+                    android:textColor="@color/brand_gold"
+                    android:textStyle="bold"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
+
+                <TextView
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:text="Min Elixir (k):"
+                    android:textColor="@color/text_white"
+                    android:textSize="12sp" />
+
+                <EditText
+                    android:id="@+id/et_min_elixir"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="350"
+                    android:inputType="number"
+                    android:textColor="@color/brand_elixir"
+                    android:textStyle="bold"
+                    android:textSize="13sp" />
+            </LinearLayout>
+
+            <CheckBox
+                android:id="@+id/cb_auto_harvest"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Auto Panen Tambang (Mines &amp; Collectors)"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                android:checked="true"
+                android:layout_marginTop="6dp" />
+
+            <CheckBox
+                android:id="@+id/cb_auto_zoom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Auto Zoom-Out Layar 2x Sebelum Serang"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                android:checked="true" />
+
+            <CheckBox
+                android:id="@+id/cb_auto_train"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Auto Quick Train Pasukan di Barak"
+                android:textColor="@color/text_white"
+                android:textSize="12sp"
+                android:checked="true" />
+        </LinearLayout>
+
+        <!-- Troop Preset Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@color/card_dark"
+            android:padding="14dp"
+            android:layout_marginTop="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="👥 Preset Pasukan Aktif"
+                android:textColor="@color/brand_cyan"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Barch Perimeter Striker (260/260 Space)"
+                android:textColor="@color/text_white"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginTop="3dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 120 Barbarian (Lv 9)&#10;• 140 Archer (Lv 9)&#10;• Deploy melingkar 12 titik luar perbatasan"
+                android:textColor="@color/text_gray"
+                android:textSize="11sp"
+                android:layout_marginTop="4dp" />
+        </LinearLayout>
+
+        <!-- Status Log Text -->
+        <TextView
+            android:id="@+id/tv_status_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status: Kelnara Bot CoC Siap Digunakan"
+            android:textColor="@color/brand_emerald"
+            android:textSize="11sp"
+            android:gravity="center"
+            android:layout_marginTop="18dp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kelnara Bot CoC v1.0.0 — Native Edition"
+            android:textColor="@color/text_gray"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:layout_marginTop="6dp"
+            android:paddingBottom="16dp" />
+    </LinearLayout>
+</ScrollView>
