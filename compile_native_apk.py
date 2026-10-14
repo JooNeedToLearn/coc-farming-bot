@@ -25,7 +25,6 @@ os.makedirs(DEX_DIR, exist_ok=True)
 COMPILED_RES = os.path.join(WORK_DIR, "resources.zip")
 BASE_APK = os.path.join(WORK_DIR, "base.apk")
 FINAL_APK = os.path.join(r"d:\Documents\LifeHack\coc_farming_bot", "android", "Kelnara_Bot_CoC.apk")
-DESKTOP_APK = os.path.join(os.path.expanduser("~"), "Desktop", "Kelnara_Bot_CoC.apk")
 
 print("=== MEMULAI KOMPILASI APLIKASI NATIVE KELNARA BOT CoC ===")
 
@@ -129,12 +128,9 @@ if res.returncode != 0:
     sys.exit(1)
 print(res.stdout.strip())
 
-# Copy to final destinations
+# Copy to final destination
 shutil.copyfile(SIGNED_TEMP_APK, FINAL_APK)
 print(f"\n✅ APK BERHASIL DIBUAT: {FINAL_APK}")
-if os.path.exists(os.path.dirname(DESKTOP_APK)):
-    shutil.copyfile(SIGNED_TEMP_APK, DESKTOP_APK)
-    print(f"✅ APK JUGA DISALIN KE DESKTOP: {DESKTOP_APK}")
 
 size_mb = os.path.getsize(FINAL_APK) / (1024 * 1024)
 print(f"Ukuran APK murni: {size_mb:.2f} MB (Sangat ringan, 100% Native, Tanpa AutoX, Bebas Crash!)")
