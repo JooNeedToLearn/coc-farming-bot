@@ -190,3 +190,19 @@ class ADBBridge:
         except Exception as e:
             print(f"[ADB] Error membaca ukuran layar: {e}")
         return None
+
+    def pinch_zoom_out(self, times: int = 2) -> bool:
+        """Simulates two-finger pinch inward gesture to zoom out the battlefield."""
+        print(f"[ADB] Melakukan zoom-out kamera ({times}x pinch)...")
+        w, h = self.get_screen_size() or (1280, 720)
+        cx, cy = w // 2, h // 2
+
+        for _ in range(times):
+            # Swipe diagonal 1: sudut kiri atas ke tengah
+            self.swipe(int(cx * 0.4), int(cy * 0.4), int(cx * 0.85), int(cy * 0.85), duration_ms=250)
+            time.sleep(0.08)
+            # Swipe diagonal 2: sudut kanan bawah ke tengah
+            self.swipe(int(cx * 1.6), int(cy * 1.6), int(cx * 1.15), int(cy * 1.15), duration_ms=250)
+            time.sleep(0.4)
+        return True
+

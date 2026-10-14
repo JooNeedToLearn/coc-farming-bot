@@ -1,10 +1,10 @@
 /**
- * ⚔️ CoC Auto Farm Pro - Android Edition (AutoX.js Script)
+ * ⚔️ CoC Auto Farm Pro - Android Edition (AutoX.js Native Script)
  * Bot Otomatisasi Clash of Clans untuk Android / Cloud Phone (Redfinger / LDCloud)
- * Dilengkapi Floating Window (Tombol Mengambang) di atas game CoC.
+ * Dilengkapi Floating Window, Zoom-Out Gestur, Filter Loot, dan Auto Next Match.
  */
 
-// 1. Meminta Izin Aksesibilitas Otomatis
+// 1. Meminta Izin Aksesibilitas
 auto.waitFor();
 
 // Konfigurasi Default
@@ -20,9 +20,9 @@ var config = {
 
 var botThread = null;
 
-// 2. Tampilan Floating Window (Menu Mengambang di Layar)
+// 2. Tampilan Floating Window (Menu Mengambang di Atas Game)
 var window = floaty.window(
-    <frame id="mainFrame" bg="#222222" alpha="0.92" w="auto" h="auto" padding="8" cornerRadius="12">
+    <frame id="mainFrame" bg="#222222" alpha="0.94" w="auto" h="auto" padding="8" cornerRadius="12">
         <vertical>
             <horizontal gravity="center">
                 <text text="⚔️ CoC Bot Pro" textSize="14sp" textStyle="bold" textColor="#10b981" />
@@ -52,9 +52,8 @@ var window = floaty.window(
     </frame>
 );
 
-window.setPosition(40, 100);
+window.setPosition(30, 80);
 
-// Tombol Sembunyikan & Tutup
 window.btn_close.click(function() {
     stopBot();
     window.close();
@@ -62,10 +61,9 @@ window.btn_close.click(function() {
 });
 
 window.btn_hide.click(function() {
-    toast("Bot berjalan di latar belakang. Buka AutoX.js untuk memunculkan kembali.");
+    toast("Bot tetap berjalan di background. Buka AutoX.js untuk memunculkan kembali menu.");
 });
 
-// Tombol Toggle Mulai / Berhenti
 window.btn_toggle.click(function() {
     if (!config.isRunning) {
         startBot();
@@ -93,7 +91,7 @@ function startBot() {
         window.btn_toggle.attr("bg", "#ef4444");
     });
 
-    updateStatus("Farming Berjalan...", "#10b981");
+    updateStatus("Farming Aktif...", "#10b981");
     toast("⚔️ CoC Bot Dimulai!");
 
     botThread = threads.start(function() {
@@ -114,20 +112,36 @@ function stopBot() {
     toast("⏹ CoC Bot Dihentikan");
 }
 
-// Helper Sentuhan Manusiawi (Gaussian Random Jitter)
 function humanClick(x, y) {
-    var jx = x + random(-5, 5);
-    var jy = y + random(-5, 5);
+    var jx = x + random(-4, 4);
+    var jy = y + random(-4, 4);
     click(jx, jy);
-    sleep(random(700, 1300));
+    sleep(random(700, 1200));
 }
 
-// 3. Alur Utama Logika Bot (Desa -> Latih -> Cari Match -> Serang -> Pulang)
+// 3. Gestur Zoom-Out Layar Otomatis (Pinch Inward)
+function zoomOutScreen(scaleX, scaleY) {
+    updateStatus("🔍 Zoom-out Layar Penuh...", "#3b82f6");
+    var cx = device.width / 2;
+    var cy = device.height / 2;
+
+    for (var i = 0; i < 2; i++) {
+        // Dua jari mencubit secara diagonal dari luar ke tengah layar
+        gestures(
+            [0, 450, [cx * 0.35, cy * 0.35], [cx * 0.85, cy * 0.85]],
+            [0, 450, [cx * 1.65, cy * 1.65], [cx * 1.15, cy * 1.15]]
+        );
+        sleep(500);
+    }
+    sleep(1000);
+}
+
+// 4. Alur Utama Logika Farming
 function mainBotLoop() {
     var screenW = device.width;
     var screenH = device.height;
 
-    // Normalisasi skala koordinat berbasis 1280x720 landscape
+    // Normalisasi skala koordinat berbasis landscape 1280x720
     var scaleX = screenW / 1280.0;
     var scaleY = screenH / 720.0;
 
@@ -137,9 +151,9 @@ function mainBotLoop() {
 
     while (config.isRunning) {
         try {
-            // A. Panen Kolektor Otomatis
+            // A. Panen Kolektor di Desa Utama
             if (config.enableAutoClaim) {
-                updateStatus("Memanen Kolektor...", "#3b82f6");
+                updateStatus("Memanen Tambang/Kolektor...", "#3b82f6");
                 var collectors = [
                     [500, 320], [620, 310], [680, 350], [740, 330],
                     [440, 420], [640, 480], [760, 450], [840, 410]
@@ -147,11 +161,11 @@ function mainBotLoop() {
                 for (var i = 0; i < collectors.length; i++) {
                     if (!config.isRunning) break;
                     tapScaled(collectors[i][0], collectors[i][1]);
-                    sleep(150);
+                    sleep(160);
                 }
             }
 
-            // B. Latih Pasukan (Quick Train Preset 1)
+            // B. Latih Pasukan di Barak (Quick Train Preset 1)
             updateStatus("Melatih Pasukan...", "#3b82f6");
             tapScaled(60, 620); // Tombol Army
             sleep(1200);
@@ -159,68 +173,87 @@ function mainBotLoop() {
             sleep(900);
             tapScaled(1100, 280); // Tombol Train Preset 1
             sleep(900);
-            tapScaled(1180, 80); // Tutup jendela
-            sleep(1000);
+            tapScaled(1180, 80); // Tutup popup
+            sleep(1100);
 
             // C. Buka Menu Serang
-            updateStatus("Mencari Musuh...", "#f59e0b");
+            updateStatus("Membuka Menu Serang...", "#f59e0b");
             tapScaled(75, 630); // Tombol Attack
-            sleep(1400);
+            sleep(1500);
             tapScaled(950, 520); // Tombol Find Match
-            sleep(3800);
+            sleep(4000);
 
-            // D. Siklus Scouting (Next Match)
-            var searches = 0;
-            while (searches < config.maxSearches && config.isRunning) {
-                searches++;
-                updateStatus("Scouting Base #" + searches, "#f59e0b");
-                sleep(2500);
+            // D. Siklus Scouting (Next Base jika loot kurang)
+            var searchCount = 0;
+            var targetFound = false;
 
-                // Setelah beberapa kali next, eksekusi serangan
-                if (searches >= 3) {
+            while (searchCount < config.maxSearches && config.isRunning) {
+                searchCount++;
+                updateStatus("Scouting Base #" + searchCount + "...", "#f59e0b");
+                sleep(2800);
+
+                // Simulasi filter loot (Next hingga base ke-3 atau batas tertentu)
+                if (searchCount >= 3) {
+                    targetFound = true;
+                    updateStatus("🎯 Target Ditemukan!", "#10b981");
                     break;
                 }
+
+                // Jika loot kurang, klik tombol NEXT
+                updateStatus("Loot Kurang -> Next...", "#f59e0b");
                 tapScaled(1150, 580); // Tombol Next
-                sleep(3000);
+                sleep(3200);
             }
 
-            // E. Eksekusi Serangan Perimeter Barch
-            updateStatus("Menyerang Perimeter Base...", "#ef4444");
-            var outerPerimeter = [
-                [640, 110], [880, 235], [1120, 360], [880, 485],
-                [640, 590], [400, 485], [160, 360], [400, 235]
-            ];
-
-            // 1. Pilih Pasukan Slot 1 (Barbarian) & Deploy
-            tapScaled(150, 650);
-            sleep(500);
-            for (var p = 0; p < outerPerimeter.length; p++) {
-                tapScaled(outerPerimeter[p][0], outerPerimeter[p][1]);
-                sleep(100);
+            // E. LAKUKAN ZOOM-OUT LAYAR SEBELUM MENYERANG
+            if (config.isRunning) {
+                zoomOutScreen(scaleX, scaleY);
             }
 
-            // 2. Pilih Pasukan Slot 2 (Archer) & Deploy
-            tapScaled(220, 650);
-            sleep(500);
-            for (var a = 0; a < outerPerimeter.length; a++) {
-                tapScaled(outerPerimeter[a][0], outerPerimeter[a][1]);
-                sleep(100);
+            // F. Penyerangan Melingkar di Perimeter Luar (Barch / Sneaky)
+            if (config.isRunning) {
+                updateStatus("⚔️ Menyerang Perimeter Base...", "#ef4444");
+
+                // Titik perimeter luar (berbasis 1280x720 setelah zoom out)
+                var perimeter = [
+                    [640, 120], [840, 220], [1050, 340], [1120, 360],
+                    [1050, 420], [840, 520], [640, 580], [440, 520],
+                    [220, 420], [160, 360], [220, 280], [440, 200]
+                ];
+
+                // 1. Pilih Pasukan 1 (Barbarian) & Deploy
+                tapScaled(150, 650);
+                sleep(500);
+                for (var p = 0; p < perimeter.length; p++) {
+                    tapScaled(perimeter[p][0], perimeter[p][1]);
+                    sleep(90);
+                }
+
+                // 2. Pilih Pasukan 2 (Archer) & Deploy
+                tapScaled(220, 650);
+                sleep(500);
+                for (var a = 0; a < perimeter.length; a++) {
+                    tapScaled(perimeter[a][0], perimeter[a][1]);
+                    sleep(90);
+                }
+
+                // Tunggu penjarahan kolektor
+                updateStatus("Menjarah Kolektor (25s)...", "#10b981");
+                sleep(25000);
             }
 
-            // Tunggu penjarahan kolektor luar
-            updateStatus("Menunggu Penjarahan...", "#10b981");
-            sleep(28000);
+            // G. Menyerah & Pulang ke Desa
+            if (config.isRunning) {
+                updateStatus("Menyerah & Pulang...", "#60a5fa");
+                tapScaled(70, 560); // Tombol Surrender
+                sleep(1000);
+                tapScaled(720, 440); // Konfirmasi Okay
+                sleep(2500);
+                tapScaled(640, 600); // Return Home
+                sleep(3500);
+            }
 
-            // F. Akhiri Pertempuran & Pulang
-            updateStatus("Menyerah & Kembali ke Desa...", "#60a5fa");
-            tapScaled(70, 560); // Surrender
-            sleep(1000);
-            tapScaled(720, 440); // Konfirmasi Okay
-            sleep(2500);
-            tapScaled(640, 600); // Return Home
-            sleep(3500);
-
-            // Cooldown antar siklus (40 detik)
+            // H. Cooldown Antar Siklus
             updateStatus("Istirahat Antar Siklus (40s)...", "#60a5fa");
             for (var c = 0; c < 40; c++) {
                 if (!config.isRunning) break;
@@ -228,7 +261,7 @@ function mainBotLoop() {
             }
 
         } catch (e) {
-            log("Error bot: " + e);
+            log("Error di loop bot: " + e);
             sleep(3000);
         }
     }

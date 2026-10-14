@@ -178,10 +178,14 @@ class BotController:
                     search_idx += 1
 
                 if matched and not self.is_interrupted():
+                    self.log("🔍 Melakukan zoom-out kamera agar seluruh perimeter terlihat penuh...")
+                    self.adb.pinch_zoom_out(times=2)
+                    time.sleep(1.2)
                     self.strategy.execute_attack(cycles=2)
                     self.finish_battle()
                     self.total_attacks += 1
                     self.log(f"✅ Total serangan sukses: {self.total_attacks}/{max_attacks}")
+
 
             if enable_builder and not self.is_interrupted():
                 self.log("\n--- Menjalankan Rutinitas Desa Malam ---")
