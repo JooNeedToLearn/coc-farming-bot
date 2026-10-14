@@ -2,15 +2,43 @@ import subprocess
 import cv2
 import numpy as np
 import time
+import os
+import sys
+import shutil
 from typing import Optional, Tuple, List
 
 
 class ADBBridge:
-    def __init__(self, adb_path: str = r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe", host: str = "127.0.0.1", port: int = 5555):
-        self.adb_path = adb_path
+    def __init__(self, adb_path: Optional[str] = None, host: str = "127.0.0.1", port: int = 5555):
         self.host = host
         self.port = port
         self.device_id: Optional[str] = None
+        self.is_termux = "TERMUX_VERSION" in os.environ or os.path.exists("/data/data/com.termux")
+        self.use_direct_root = False
+
+        # Resolusi path ADB sesuai OS
+        if adb_path and os.path.exists(adb_path):
+            self.adb_path = adb_path
+        elif sys.platform == "win32":
+            # Windows fallback
+            default_bs = r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe"
+            self.adb_path = default_bs if os.path.exists(default_bs) else (shutil.which("adb") or "adb")
+        else:
+            # Android Termux / Linux
+            self.adb_path = shutil.which("adb") or "adb"
+
+    def _check_root(self) -> bool:
+        """Checks if device has direct root execution available."""
+        if not self.is_termux:
+            return False
+        try:
+            res = subprocess.run(["su", "-c", "id"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=2)
+            if res.returncode == 0 and b"uid=0" in res.stdout:
+                self.use_direct_root = True
+                return True
+        except Exception:
+            pass
+        return False
 
     def _get_attached_devices(self) -> List[str]:
         """Queries ADB for currently attached and ready devices."""
@@ -28,12 +56,16 @@ class ADBBridge:
             return []
 
     def connect(self) -> bool:
-        """Connects to BlueStacks ADB daemon and selects active device."""
-        try:
-            # 1. Cek apakah device sudah langsung terdaftar (misal: emulator-5554)
-            devices = self._get_attached_devices()
+        """Connects to ADB daemon or verifies direct root access on Cloud Phone."""
+        # 1. Cek apakah berjalan di Termux dengan akses Root langsung
+        if self._check_root():
+            print("[ADB] ✅ Terdeteksi mode Root langsung di Termux (Cloud Phone).")
+            self.device_id = "local_root"
+            return True
 
-            # 2. Jika belum ada, coba kirim perintah connect
+        # 2. Cek apakah ada device terdaftar via ADB
+        try:
+            devices = self._get_attached_devices()
             if not devices:
                 target = f"{self.host}:{self.port}"
                 try:
@@ -44,11 +76,9 @@ class ADBBridge:
                 devices = self._get_attached_devices()
 
             if not devices:
-                print("[ADB] Tidak ada emulator yang terdeteksi.")
-                print("[ADB] Pastikan BlueStacks 5 sedang berjalan dan setting ADB sudah aktif.")
+                print("[ADB] Tidak ada device/emulator yang terdeteksi.")
                 return False
 
-            # Utamakan 127.0.0.1:5555 atau emulator-5554
             preferred = f"{self.host}:{self.port}"
             if preferred in devices:
                 self.device_id = preferred
@@ -67,10 +97,15 @@ class ADBBridge:
             if not self.connect():
                 return None
 
-        cmd = [self.adb_path, "-s", self.device_id, "exec-out", "screencap", "-p"]
+        # Mode Root Termux
+        if self.use_direct_root:
+            cmd = ["su", "-c", "screencap -p"]
+        else:
+            cmd = [self.adb_path, "-s", self.device_id, "exec-out", "screencap", "-p"]
+
         try:
             process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            raw_png, _ = process.communicate(timeout=3)
+            raw_png, _ = process.communicate(timeout=4)
             if not raw_png:
                 return None
 
@@ -87,7 +122,11 @@ class ADBBridge:
             if not self.connect():
                 return False
 
-        cmd = [self.adb_path, "-s", self.device_id, "shell", "input", "tap", str(int(x)), str(int(y))]
+        if self.use_direct_root:
+            cmd = ["su", "-c", f"input tap {int(x)} {int(y)}"]
+        else:
+            cmd = [self.adb_path, "-s", self.device_id, "shell", "input", "tap", str(int(x)), str(int(y))]
+
         try:
             subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=3)
             return True
@@ -101,10 +140,14 @@ class ADBBridge:
             if not self.connect():
                 return False
 
-        cmd = [
-            self.adb_path, "-s", self.device_id, "shell", "input", "swipe",
-            str(int(x1)), str(int(y1)), str(int(x2)), str(int(y2)), str(int(duration_ms))
-        ]
+        if self.use_direct_root:
+            cmd = ["su", "-c", f"input swipe {int(x1)} {int(y1)} {int(x2)} {int(y2)} {int(duration_ms)}"]
+        else:
+            cmd = [
+                self.adb_path, "-s", self.device_id, "shell", "input", "swipe",
+                str(int(x1)), str(int(y1)), str(int(x2)), str(int(y2)), str(int(duration_ms))
+            ]
+
         try:
             subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=5)
             return True
@@ -113,12 +156,16 @@ class ADBBridge:
             return False
 
     def get_screen_size(self) -> Optional[Tuple[int, int]]:
-        """Returns (width, height) of current emulator screen."""
+        """Returns (width, height) of current emulator/device screen."""
         if not self.device_id:
             if not self.connect():
                 return None
 
-        cmd = [self.adb_path, "-s", self.device_id, "shell", "wm", "size"]
+        if self.use_direct_root:
+            cmd = ["su", "-c", "wm size"]
+        else:
+            cmd = [self.adb_path, "-s", self.device_id, "shell", "wm", "size"]
+
         try:
             res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=3)
             for line in res.stdout.split("\n"):
