@@ -24,5 +24,8 @@ env/
 Thumbs.db
 .DS_Store
 
-# Large Android Binaries
+# Large Android Binaries & Templates
 *.apk
+assets/
+build_apk/
+*.keystore
