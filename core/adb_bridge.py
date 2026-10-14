@@ -1,11 +1,24 @@
 import subprocess
-import cv2
 import numpy as np
 import time
 import os
 import sys
 import shutil
+import io
 from typing import Optional, Tuple, List
+
+# Try importing cv2, fallback to PIL if not installed
+try:
+    import cv2
+    HAS_CV2 = True
+except ImportError:
+    HAS_CV2 = False
+
+try:
+    from PIL import Image
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
 
 
 class ADBBridge:
@@ -20,11 +33,9 @@ class ADBBridge:
         if adb_path and os.path.exists(adb_path):
             self.adb_path = adb_path
         elif sys.platform == "win32":
-            # Windows fallback
             default_bs = r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe"
             self.adb_path = default_bs if os.path.exists(default_bs) else (shutil.which("adb") or "adb")
         else:
-            # Android Termux / Linux
             self.adb_path = shutil.which("adb") or "adb"
 
     def _check_root(self) -> bool:
@@ -57,13 +68,11 @@ class ADBBridge:
 
     def connect(self) -> bool:
         """Connects to ADB daemon or verifies direct root access on Cloud Phone."""
-        # 1. Cek apakah berjalan di Termux dengan akses Root langsung
         if self._check_root():
             print("[ADB] ✅ Terdeteksi mode Root langsung di Termux (Cloud Phone).")
             self.device_id = "local_root"
             return True
 
-        # 2. Cek apakah ada device terdaftar via ADB
         try:
             devices = self._get_attached_devices()
             if not devices:
@@ -92,12 +101,11 @@ class ADBBridge:
             return False
 
     def screencap(self) -> Optional[np.ndarray]:
-        """Captures screen directly into memory as an OpenCV BGR image."""
+        """Captures screen directly into memory as an image array."""
         if not self.device_id:
             if not self.connect():
                 return None
 
-        # Mode Root Termux
         if self.use_direct_root:
             cmd = ["su", "-c", "screencap -p"]
         else:
@@ -109,9 +117,15 @@ class ADBBridge:
             if not raw_png:
                 return None
 
-            img_array = np.frombuffer(raw_png, dtype=np.uint8)
-            img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
-            return img
+            if HAS_CV2:
+                img_array = np.frombuffer(raw_png, dtype=np.uint8)
+                return cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+            elif HAS_PIL:
+                pil_img = Image.open(io.BytesIO(raw_png)).convert("RGB")
+                # Return as BGR numpy array to maintain compatibility
+                rgb_arr = np.array(pil_img)
+                return rgb_arr[:, :, ::-1]
+            return None
         except Exception as e:
             print(f"[ADB] Error saat mengambil screencap: {e}")
             return None
