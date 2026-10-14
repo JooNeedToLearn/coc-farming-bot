@@ -1,12 +1,14 @@
 /**
- * ⚔️ CoC Auto Farm Pro - Redfinger & Cloud Phone Edition
- * Dikhususkan 100% untuk Cloud Phone (Redfinger / LDCloud).
- * Menggunakan AutoX.js dengan Floating Widget yang bisa digeser (draggable),
- * Zoom-out layar otomatis 2x, Auto Loot Filter, dan Siklus Farming 24 Jam.
+ * ⚔️ CoC Auto Farm Pro - Redfinger Cloud Phone Edition
+ * Dilengkapi pengecekan otomatis izin Floating Window & Aksesibilitas.
  */
 
-// 1. Meminta Izin Aksesibilitas
-auto.waitFor();
+// 1. Cek & Minta Izin Floating Window (Tampilkan di atas aplikasi lain)
+if (!floaty.checkPermission()) {
+    toastLog("⚠️ Harap aktifkan izin 'Tampilkan di atas aplikasi lain' untuk AutoX");
+    floaty.requestPermission();
+    sleep(2000);
+}
 
 // Konfigurasi Default Bot
 var config = {
@@ -14,13 +16,12 @@ var config = {
     minElixir: 200000,
     maxSearches: 30,
     enableAutoClaim: true,
-    enableBuilderBase: false,
     isRunning: false
 };
 
 var botThread = null;
 
-// 2. Tampilan Floating Widget (Bisa Digeser / Draggable di Layar)
+// 2. Tampilan Floating Widget (Bisa Digeser / Draggable)
 var window = floaty.window(
     <frame id="mainFrame" bg="#1e1e1e" alpha="0.95" w="auto" h="auto" padding="10" cornerRadius="14">
         <vertical>
@@ -46,13 +47,14 @@ var window = floaty.window(
             
             <horizontal marginTop="8" gravity="center">
                 <button id="btn_toggle" text="▶ MULAI" w="85" h="38" bg="#10b981" textColor="#ffffff" textStyle="bold" />
-                <button id="btn_hide" text="Tutup Menu" w="85" h="38" bg="#3b82f6" textColor="#ffffff" marginLeft="6" />
+                <button id="btn_hide" text="Tutup" w="85" h="38" bg="#3b82f6" textColor="#ffffff" marginLeft="6" />
             </horizontal>
         </vertical>
     </frame>
 );
 
 window.setPosition(40, 80);
+toastLog("✅ Menu Bot CoC Berhasil Muncul!");
 
 // Fitur Drag & Drop untuk Menggeser Floating Window
 var touchStartX = 0, touchStartY = 0;
@@ -83,7 +85,7 @@ window.btn_close.click(function() {
 });
 
 window.btn_hide.click(function() {
-    toast("Bot tetap jalan. Buka AutoX.js jika ingin membuka menu kembali.");
+    toast("Bot tetap jalan. Buka AutoX.js jika ingin memunculkan menu.");
 });
 
 window.btn_toggle.click(function() {
@@ -102,6 +104,15 @@ function updateStatus(text, color) {
 }
 
 function startBot() {
+    // Memastikan izin Aksesibilitas aktif saat tombol Mulai ditekan
+    if (auto.service == null) {
+        toastLog("⚠️ Membuka pengaturan... Aktifkan Layanan Aksesibilitas untuk AutoX");
+        app.startActivity({
+            action: "android.settings.ACCESSIBILITY_SETTINGS"
+        });
+        return;
+    }
+
     config.isRunning = true;
     config.minGold = parseInt(window.inp_gold.getText().toString()) * 1000 || 200000;
     config.minElixir = parseInt(window.inp_elixir.getText().toString()) * 1000 || 200000;
@@ -140,7 +151,7 @@ function humanClick(x, y) {
     sleep(random(700, 1200));
 }
 
-// 3. Gestur Zoom-Out Layar Otomatis (Dua Jari Mencubit ke Tengah)
+// 3. Gestur Zoom-Out Layar Otomatis
 function zoomOutScreen(cx, cy) {
     updateStatus("🔍 Zoom-out Layar...", "#3b82f6");
     for (var i = 0; i < 2; i++) {
@@ -155,7 +166,6 @@ function zoomOutScreen(cx, cy) {
 
 // 4. Siklus Utama Farming di Cloud Phone
 function mainBotLoop() {
-    // Memastikan koordinat selalu dalam orientasi Landscape CoC
     var screenW = Math.max(device.width, device.height);
     var screenH = Math.min(device.width, device.height);
 
@@ -211,7 +221,6 @@ function mainBotLoop() {
                 updateStatus("Scouting Base #" + searchCount + "...", "#f59e0b");
                 sleep(2800);
 
-                // Melewati base dengan loot sedikit (loop next)
                 if (searchCount >= 3) {
                     updateStatus("🎯 Target Terpenuhi!", "#10b981");
                     break;
@@ -282,3 +291,6 @@ function mainBotLoop() {
         }
     }
 }
+
+// Menjaga agar background thread tetap aktif
+setInterval(function() {}, 1000);
