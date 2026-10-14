@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Kelnara Bot CoC — Smart Farming, Easy Progress</title>
+  <meta name="description" content="Aplikasi Pendamping & Game Assistant Farming Clash of Clans #1">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              gold: '#f59e0b',
+              elixir: '#d946ef',
+              darkElixir: '#06b6d4',
+              emerald: '#10b981',
+              dark: '#0b0f19',
+              card: '#131b2e',
+              border: '#1f293d'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Mobile app feel */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+    .glow-gold {
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.25);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 15px rgba(16, 185, 129, 0.25);
+    }
+  </style>
+</head>
+<body class="bg-[#0b0f19] text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-amber-500 selection:text-black">
+
+  <!-- Top App Bar -->
+  <header class="sticky top-0 z-40 bg-[#0f172a]/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-3 flex items-center justify-between">
+    <div class="flex items-center space-x-3">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-600 via-amber-500 to-emerald-400 p-[2px] shadow-lg flex-shrink-0">
+        <div class="w-full h-full bg-[#0b0f19] rounded-[10px] flex items-center justify-center font-black text-amber-400 text-lg">
+          ⚔️
+        </div>
+      </div>
+      <div>
+        <div class="flex items-center space-x-2">
+          <h1 class="font-extrabold text-base md:text-lg tracking-wide bg-gradient-to-r from-amber-400 via-emerald-400 to-sky-400 bg-clip-text text-transparent">
+            KELNARA BOT CoC
+          </h1>
+          <span class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            PRO
+          </span>
+        </div>
+        <p class="text-[11px] text-slate-400 font-medium">Smart Farming, Easy Progress</p>
+      </div>
+    </div>
+
+    <!-- Right Actions -->
+    <div class="flex items-center space-x-2">
+      <button id="btnSyncFloating" onclick="openFloatingModal()" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold transition">
+        <i data-lucide="smartphone" class="w-4 h-4"></i>
+        <span class="hidden sm:inline">Floating Bot</span>
+      </button>
+      <button onclick="switchTab('settings')" class="p-2 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition">
+        <i data-lucide="settings" class="w-4 h-4"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="flex-1 flex max-w-7xl w-full mx-auto pb-24 md:pb-8">
+    
+    <!-- Sidebar for PC / Desktop -->
+    <aside class="hidden md:flex flex-col w-64 border-r border-slate-800/80 p-4 space-y-2 bg-[#0c1222]/50">
+      <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 mb-1">Menu Navigasi</div>
+      
+      <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition" data-tab="dashboard">
+        <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+        <span>Dashboard</span>
+      </button>
+
+      <button onclick="switchTab('farming')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition" data-tab="farming">
+        <i data-lucide="crosshair" class="w-5 h-5"></i>
+        <span>Farming Assistant</span>
+      </button>
+
+      <button onclick="switchTab('troops')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition" data-tab="troops">
+        <i data-lucide="users" class="w-5 h-5"></i>
+        <span>Troop Presets</span>
+      </button>
+
+      <button onclick="switchTab('upgrades')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition" data-tab="upgrades">
+        <i data-lucide="hammer" class="w-5 h-5"></i>
+        <span>Upgrade Tracker</span>
+      </button>
+
+      <button onclick="switchTab('battles')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition" data-tab="battles">
+        <i data-lucide="swords" class="w-5 h-5"></i>
+        <span>Battle Tracker</span>
+      </button>
+
+      <button onclick="switchTab('session')" class="nav-btn w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition" data-tab="session">
+        <i data-lucide="timer" class="w-5 h-5"></i>
+        <span>Session Manager</span>
+      </button>
+
+      <div class="pt-4 border-t border-slate-800">
+        <div class="bg-gradient-to-br from-amber-500/10 to-emerald-500/10 border border-amber-500/20 rounded-xl p-3 text-xs">
+          <div class="flex items-center space-x-2 text-amber-400 font-bold mb-1">
+            <i data-lucide="shield-check" class="w-4 h-4"></i>
+            <span>Akun Terverifikasi</span>
+          </div>
+          <div class="text-slate-300 font-semibold truncate" id="sideAccountName">HAHAHAA BURUH PABRIK</div>
+          <div class="text-slate-400 text-[10px]">TH13 • Level 158 • Champion</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 md:p-6 overflow-y-auto custom-scrollbar">
+
+      <!-- ============================================== -->
+      <!-- TAB 1: DASHBOARD MONITORING                   -->
+      <!-- ============================================== -->
+      <section id="tab-dashboard" class="tab-pane space-y-6">
+        <!-- Village Profile Banner -->
+        <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-[#131b2e] to-slate-900 border border-slate-800 p-5 shadow-xl">
+          <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
+            <i data-lucide="shield" class="w-56 h-56 text-amber-400"></i>
+          </div>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 relative z-10">
+            <div class="flex items-center space-x-4">
+              <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-500/40 flex items-center justify-center text-3xl shadow-lg">
+                🏰
+              </div>
+              <div>
+                <div class="flex items-center space-x-2">
+                  <h2 class="text-xl font-black text-white" id="dashAccountName">HAHAHAA BURUH PABRIK</h2>
+                  <span class="px-2 py-0.5 text-xs font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30 rounded-md">TH 13</span>
+                </div>
+                <p class="text-xs text-slate-400 mt-0.5">Level 158 • 5/5 Builder Aktif • Champion League III</p>
+                <div class="flex items-center space-x-3 mt-2 text-xs">
+                  <span class="text-emerald-400 flex items-center space-x-1 font-medium">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Bot Status: Siap Farming</span>
+                  </span>
+                  <span class="text-slate-400">•</span>
+                  <span class="text-slate-300">Shield: <strong class="text-white">12j 34m</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Run Floating Bot -->
+            <button onclick="startQuickFarmAction()" class="w-full sm:w-auto px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-emerald-500 hover:from-amber-600 hover:to-emerald-600 text-slate-950 font-black text-sm shadow-lg glow-emerald flex items-center justify-center space-x-2 transition transform active:scale-95">
+              <i data-lucide="play" class="w-5 h-5 fill-current"></i>
+              <span>MULAI SESI FARMING</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Resource Summary Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <!-- Gold Card -->
+          <div class="rounded-2xl bg-[#131b2e] border border-amber-500/30 p-4 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-amber-400 uppercase tracking-wide flex items-center space-x-1">
+                <span>🟡 Gold Simpanan</span>
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 font-semibold">Target: 18M</span>
+            </div>
+            <div class="text-2xl font-black text-white mt-2" id="dashGoldVal">14,250,000</div>
+            <div class="w-full bg-slate-800 rounded-full h-2 mt-3 overflow-hidden">
+              <div class="bg-gradient-to-r from-amber-600 to-amber-400 h-2 rounded-full" style="width: 79%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+              <span>79% Tercapai</span>
+              <span class="text-amber-400 font-medium">+850K sesi ini</span>
+            </div>
+          </div>
+
+          <!-- Elixir Card -->
+          <div class="rounded-2xl bg-[#131b2e] border border-fuchsia-500/30 p-4 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-fuchsia-400 uppercase tracking-wide flex items-center space-x-1">
+                <span>🟣 Elixir Simpanan</span>
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-fuchsia-500/10 text-fuchsia-300 font-semibold">Target: 18M</span>
+            </div>
+            <div class="text-2xl font-black text-white mt-2" id="dashElixirVal">12,800,000</div>
+            <div class="w-full bg-slate-800 rounded-full h-2 mt-3 overflow-hidden">
+              <div class="bg-gradient-to-r from-fuchsia-600 to-fuchsia-400 h-2 rounded-full" style="width: 71%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+              <span>71% Tercapai</span>
+              <span class="text-fuchsia-400 font-medium">+920K sesi ini</span>
+            </div>
+          </div>
+
+          <!-- Dark Elixir Card -->
+          <div class="rounded-2xl bg-[#131b2e] border border-cyan-500/30 p-4 relative overflow-hidden">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-cyan-400 uppercase tracking-wide flex items-center space-x-1">
+                <span>⚫ Dark Elixir</span>
+              </span>
+              <span class="text-[10px] px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 font-semibold">Target: 300K</span>
+            </div>
+            <div class="text-2xl font-black text-white mt-2" id="dashDeVal">240,500</div>
+            <div class="w-full bg-slate-800 rounded-full h-2 mt-3 overflow-hidden">
+              <div class="bg-gradient-to-r from-cyan-600 to-cyan-400 h-2 rounded-full" style="width: 80%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-slate-400 mt-1">
+              <span>80% Tercapai</span>
+              <span class="text-cyan-400 font-medium">+12.4K sesi ini</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Middle 2-Column: Builder Live Status & Active Preset -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <!-- Active Builders -->
+          <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+                <i data-lucide="hammer" class="w-4 h-4 text-amber-400"></i>
+                <span>Status Pekerja Bangunan (5/5)</span>
+              </h3>
+              <button onclick="switchTab('upgrades')" class="text-xs text-amber-400 hover:underline">Kelola &rarr;</button>
+            </div>
+            
+            <div class="space-y-3">
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center font-bold text-xs">B1</div>
+                  <div>
+                    <div class="text-xs font-bold text-white">Scattershot Lv 2</div>
+                    <div class="text-[10px] text-slate-400">14.5M Gold • Selesai dlm 1h 14m</div>
+                  </div>
+                </div>
+                <span class="px-2 py-1 rounded bg-amber-500/10 text-amber-400 font-mono text-xs font-bold">01j : 14m</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-xs">B2</div>
+                  <div>
+                    <div class="text-xs font-bold text-white">Inferno Tower Lv 7</div>
+                    <div class="text-[10px] text-slate-400">12M Gold • Selesai dlm 8j 20m</div>
+                  </div>
+                </div>
+                <span class="px-2 py-1 rounded bg-amber-500/10 text-amber-400 font-mono text-xs font-bold">08j : 20m</span>
+              </div>
+
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/80 border border-slate-800/80">
+                <div class="flex items-center space-x-3">
+                  <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-xs">LAB</div>
+                  <div>
+                    <div class="text-xs font-bold text-white">Rage Spell Lv 6</div>
+                    <div class="text-[10px] text-slate-400">8M Elixir • Selesai dlm 14j 05m</div>
+                  </div>
+                </div>
+                <span class="px-2 py-1 rounded bg-blue-500/10 text-blue-400 font-mono text-xs font-bold">14j : 05m</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Troop Preset & Attack Mode -->
+          <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+                  <i data-lucide="shield-alert" class="w-4 h-4 text-emerald-400"></i>
+                  <span>Preset Pasukan Siap Serbu</span>
+                </h3>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400">AKTIF</span>
+              </div>
+
+              <div class="p-3.5 rounded-xl bg-slate-900/90 border border-emerald-500/30">
+                <div class="flex items-center justify-between">
+                  <div class="font-black text-white text-base">Barch Collector Striker</div>
+                  <span class="text-xs font-semibold text-slate-400">260 / 260 Space</span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1">120 Barbarian • 140 Archer • Fokus menjarah tambang terluar</p>
+
+                <div class="grid grid-cols-3 gap-2 mt-3 pt-3 border-t border-slate-800 text-center text-xs">
+                  <div>
+                    <span class="text-slate-400 block text-[10px]">Waktu Masak</span>
+                    <span class="font-bold text-white">18 Menit</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 block text-[10px]">Biaya Elixir</span>
+                    <span class="font-bold text-fuchsia-400">98,000</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 block text-[10px]">Rekomendasi TH</span>
+                    <span class="font-bold text-amber-400">TH 11 - 14</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between">
+              <span class="text-xs text-slate-400">Ganti strategi pasukan:</span>
+              <button onclick="switchTab('troops')" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
+                Lihat Semua Preset &rarr;
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Attacks Feed -->
+        <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+              <i data-lucide="history" class="w-4 h-4 text-sky-400"></i>
+              <span>Riwayat Serangan Terakhir</span>
+            </h3>
+            <button onclick="switchTab('battles')" class="text-xs text-sky-400 hover:underline">Lihat Selengkapnya &rarr;</button>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="text-slate-400 border-b border-slate-800">
+                <tr>
+                  <th class="pb-2">Waktu</th>
+                  <th class="pb-2">Gold Dijarah</th>
+                  <th class="pb-2">Elixir Dijarah</th>
+                  <th class="pb-2">Dark Elixir</th>
+                  <th class="pb-2">Hasil</th>
+                  <th class="pb-2">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-800/60 font-medium" id="dashRecentAttacksBody">
+                <tr>
+                  <td class="py-2.5 text-slate-400">5 mnt lalu</td>
+                  <td class="py-2.5 text-amber-400 font-bold">+540,200</td>
+                  <td class="py-2.5 text-fuchsia-400 font-bold">+510,800</td>
+                  <td class="py-2.5 text-cyan-400 font-bold">+4,800</td>
+                  <td class="py-2.5 text-white">⭐ 1 (54%)</td>
+                  <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Sukses</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 text-slate-400">28 mnt lalu</td>
+                  <td class="py-2.5 text-amber-400 font-bold">+620,000</td>
+                  <td class="py-2.5 text-fuchsia-400 font-bold">+590,400</td>
+                  <td class="py-2.5 text-cyan-400 font-bold">+5,200</td>
+                  <td class="py-2.5 text-white">⭐ 2 (72%)</td>
+                  <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Sukses</span></td>
+                </tr>
+                <tr>
+                  <td class="py-2.5 text-slate-400">52 mnt lalu</td>
+                  <td class="py-2.5 text-amber-400 font-bold">+480,000</td>
+                  <td class="py-2.5 text-fuchsia-400 font-bold">+495,000</td>
+                  <td class="py-2.5 text-cyan-400 font-bold">+3,900</td>
+                  <td class="py-2.5 text-white">⭐ 1 (51%)</td>
+                  <td class="py-2.5"><span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">Sukses</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 2: FARMING ASSISTANT                      -->
+      <!-- ============================================== -->
+      <section id="tab-farming" class="tab-pane hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">Farming Assistant</h2>
+            <p class="text-xs text-slate-400">Konfigurasi target sumber daya, minimal threshold scouting, & algoritma serangan</p>
+          </div>
+          <button onclick="saveFarmingSettings()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow transition">
+            Simpan Konfigurasi
+          </button>
+        </div>
+
+        <!-- Farming Target Card -->
+        <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+          <h3 class="font-bold text-sm text-white mb-3 flex items-center space-x-2">
+            <i data-lucide="target" class="w-4 h-4 text-amber-400"></i>
+            <span>Target Kebutuhan Sumber Daya</span>
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Target Gold (Juta)</label>
+              <div class="relative">
+                <input type="number" id="inpTargetGold" value="18" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-sm focus:border-amber-500 outline-none">
+                <span class="absolute right-3 top-2 text-xs text-slate-400">M Gold</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Target Elixir (Juta)</label>
+              <div class="relative">
+                <input type="number" id="inpTargetElixir" value="18" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-sm focus:border-fuchsia-500 outline-none">
+                <span class="absolute right-3 top-2 text-xs text-slate-400">M Elixir</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Target Dark Elixir (Ribu)</label>
+              <div class="relative">
+                <input type="number" id="inpTargetDe" value="300" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-bold text-sm focus:border-cyan-500 outline-none">
+                <span class="absolute right-3 top-2 text-xs text-slate-400">K DE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scouting Thresholds Settings -->
+        <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+          <h3 class="font-bold text-sm text-white mb-2 flex items-center space-x-2">
+            <i data-lucide="filter" class="w-4 h-4 text-emerald-400"></i>
+            <span>Batas Minimal Loot Sebelum Serang (Auto Next Threshold)</span>
+          </h3>
+          <p class="text-xs text-slate-400 mb-4">Bot akan otomatis menekan tombol "Next" jika loot desa musuh di bawah angka ini:</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+              <span class="text-xs text-amber-400 font-semibold block mb-1">Minimal Gold</span>
+              <input type="number" id="inpMinGold" value="350000" step="50000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold text-sm">
+              <span class="text-[10px] text-slate-400 mt-1 block">Rekomendasi: 300K - 500K</span>
+            </div>
+
+            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+              <span class="text-xs text-fuchsia-400 font-semibold block mb-1">Minimal Elixir</span>
+              <input type="number" id="inpMinElixir" value="350000" step="50000" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold text-sm">
+              <span class="text-[10px] text-slate-400 mt-1 block">Rekomendasi: 300K - 500K</span>
+            </div>
+
+            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+              <span class="text-xs text-cyan-400 font-semibold block mb-1">Minimal Dark Elixir</span>
+              <input type="number" id="inpMinDe" value="3000" step="500" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold text-sm">
+              <span class="text-[10px] text-slate-400 mt-1 block">Rekomendasi: 2.5K - 5K</span>
+            </div>
+
+            <div class="bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+              <span class="text-xs text-emerald-400 font-semibold block mb-1">Maksimal Scouting (Next)</span>
+              <input type="number" id="inpMaxNext" value="35" min="5" max="100" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1.5 text-white font-bold text-sm">
+              <span class="text-[10px] text-slate-400 mt-1 block">Batas klik Next per siklus</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Attack Mechanics Configuration -->
+        <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+          <h3 class="font-bold text-sm text-white mb-3 flex items-center space-x-2">
+            <i data-lucide="sliders" class="w-4 h-4 text-sky-400"></i>
+            <span>Parameter Eksekusi Serangan Otomatis</span>
+          </h3>
+
+          <div class="space-y-3">
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/70 border border-slate-800 cursor-pointer">
+              <div>
+                <span class="text-xs font-bold text-white block">Auto Zoom-Out Layar 2x Sebelum Serang</span>
+                <span class="text-[11px] text-slate-400">Penting agar seluruh base dan tambang terluar terlihat di layar cloud phone.</span>
+              </div>
+              <input type="checkbox" id="chkAutoZoom" checked class="w-5 h-5 accent-emerald-500 rounded">
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/70 border border-slate-800 cursor-pointer">
+              <div>
+                <span class="text-xs font-bold text-white block">Auto Panen Kolektor di Desa Utama (Gold & Elixir Mines)</span>
+                <span class="text-[11px] text-slate-400">Mengambil hasil tambang setiap kembali dari pertempuran.</span>
+              </div>
+              <input type="checkbox" id="chkAutoHarvest" checked class="w-5 h-5 accent-emerald-500 rounded">
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/70 border border-slate-800 cursor-pointer">
+              <div>
+                <span class="text-xs font-bold text-white block">Auto Quick Train Preset di Barak</span>
+                <span class="text-[11px] text-slate-400">Melatih ulang pasukan otomatis setelah menyerang.</span>
+              </div>
+              <input type="checkbox" id="chkAutoTrain" checked class="w-5 h-5 accent-emerald-500 rounded">
+            </label>
+
+            <label class="flex items-center justify-between p-3 rounded-xl bg-slate-900/70 border border-slate-800 cursor-pointer">
+              <div>
+                <span class="text-xs font-bold text-white block">Auto Surrender & Pulang ke Desa (Safe Exit)</span>
+                <span class="text-[11px] text-slate-400">Menghemat waktu setelah 25 detik menjarah kolektor musuh.</span>
+              </div>
+              <input type="checkbox" id="chkAutoSurrender" checked class="w-5 h-5 accent-emerald-500 rounded">
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 3: TROOP SETUP & PRESETS                  -->
+      <!-- ============================================== -->
+      <section id="tab-troops" class="tab-pane hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">Troop Presets Manager</h2>
+            <p class="text-xs text-slate-400">Susunan komposisi pasukan optimal untuk farming hemat dan efisien</p>
+          </div>
+          <button onclick="addNewPresetModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow flex items-center space-x-1.5 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Tambah Preset Baru</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="troopPresetsContainer">
+          <!-- Preset 1: Barch -->
+          <div class="rounded-2xl bg-[#131b2e] border-2 border-emerald-500/50 p-5 relative overflow-hidden shadow-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">AKTIF DIGUNAKAN</span>
+                <h3 class="text-base font-black text-white mt-1">Barch Perimeter Collector</h3>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-mono font-bold text-amber-400">260 / 260 Space</span>
+                <span class="block text-[10px] text-slate-400">TH 11 - 13</span>
+              </div>
+            </div>
+
+            <div class="mt-4 space-y-2">
+              <div class="flex items-center justify-between bg-slate-900/80 p-2 rounded-lg text-xs">
+                <span class="flex items-center space-x-2 text-slate-200">
+                  <span>🗡️ Barbarian (Lv 9)</span>
+                </span>
+                <span class="font-bold text-amber-400">120 unit</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-900/80 p-2 rounded-lg text-xs">
+                <span class="flex items-center space-x-2 text-slate-200">
+                  <span>🏹 Archer (Lv 9)</span>
+                </span>
+                <span class="font-bold text-amber-400">140 unit</span>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+              <strong>Catatan:</strong> Sangat efektif untuk desa mati (dead base). Pasukan disebar melingkar 12 titik luar untuk menghabisi kolektor emas dan tambang elixir.
+            </div>
+
+            <div class="mt-4 flex items-center space-x-2">
+              <button class="flex-1 py-2 rounded-xl bg-emerald-500/20 text-emerald-400 font-bold text-xs border border-emerald-500/40 cursor-default">
+                Sedang Terpilih
+              </button>
+              <button onclick="editPreset(1)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
+                Edit
+              </button>
+            </div>
+          </div>
+
+          <!-- Preset 2: Sneaky Goblins -->
+          <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5 relative overflow-hidden shadow-lg hover:border-slate-700 transition">
+            <div class="flex items-center justify-between">
+              <div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400">CADANGAN</span>
+                <h3 class="text-base font-black text-white mt-1">Sneaky Goblin Storage Snatcher</h3>
+              </div>
+              <div class="text-right">
+                <span class="text-xs font-mono font-bold text-amber-400">260 / 260 Space</span>
+                <span class="block text-[10px] text-slate-400">TH 11 - 16</span>
+              </div>
+            </div>
+
+            <div class="mt-4 space-y-2">
+              <div class="flex items-center justify-between bg-slate-900/80 p-2 rounded-lg text-xs">
+                <span class="flex items-center space-x-2 text-slate-200">
+                  <span>👺 Sneaky Goblin (Super)</span>
+                </span>
+                <span class="font-bold text-emerald-400">80 unit</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-900/80 p-2 rounded-lg text-xs">
+                <span class="flex items-center space-x-2 text-slate-200">
+                  <span>💣 Super Wall Breaker</span>
+                </span>
+                <span class="font-bold text-emerald-400">4 unit</span>
+              </div>
+              <div class="flex items-center justify-between bg-slate-900/80 p-2 rounded-lg text-xs">
+                <span class="flex items-center space-x-2 text-slate-200">
+                  <span>✨ Jump Spell & Invisibility</span>
+                </span>
+                <span class="font-bold text-cyan-400">4 Spell</span>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+              <strong>Catatan:</strong> Raja farming tercepat di CoC. Mampu menembus inti base musuh untuk merampok Dark Elixir Storage dan Balai Kota tanpa butuh seluruh pasukan.
+            </div>
+
+            <div class="mt-4 flex items-center space-x-2">
+              <button onclick="setActivePreset(2)" class="flex-1 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs transition">
+                Jadikan Preset Aktif
+              </button>
+              <button onclick="editPreset(2)" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200">
+                Edit
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 4: UPGRADE & WALL TRACKER                 -->
+      <!-- ============================================== -->
+      <section id="tab-upgrades" class="tab-pane hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">Upgrade & Wall Tracker</h2>
+            <p class="text-xs text-slate-400">Pantau progres tukang, hitung biaya tembok, & estimasi waktu selesai upgrade</p>
+          </div>
+          <button onclick="addNewUpgradeModal()" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow flex items-center space-x-1.5 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Catat Upgrade Baru</span>
+          </button>
+        </div>
+
+        <!-- Wall Progress Tracker Card -->
+        <div class="rounded-2xl bg-[#131b2e] border border-amber-500/30 p-5 shadow-xl">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div>
+              <h3 class="font-extrabold text-base text-white flex items-center space-x-2">
+                <span>🧱 Progres Tembok TH 13 (Level 13 &rarr; Level 14)</span>
+              </h3>
+              <p class="text-xs text-slate-400">Biaya per tembok: 4,000,000 Gold / Elixir</p>
+            </div>
+            <div class="text-right">
+              <span class="text-xl font-black text-amber-400" id="wallCountText">185 / 300</span>
+              <span class="text-xs text-slate-400 block">Tembok Maksimal</span>
+            </div>
+          </div>
+
+          <div class="w-full bg-slate-900 rounded-full h-3.5 p-0.5 overflow-hidden border border-slate-800">
+            <div class="bg-gradient-to-r from-amber-600 via-amber-500 to-emerald-400 h-full rounded-full transition-all duration-500" style="width: 61.6%"></div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-slate-800 text-center text-xs">
+            <div>
+              <span class="text-slate-400 text-[10px] block">Tembok Tersisa</span>
+              <span class="font-black text-white text-sm">115 Tembok</span>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] block">Sisa Gold Dibutuhkan</span>
+              <span class="font-black text-amber-400 text-sm">460 Juta</span>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] block">Estimasi Serangan</span>
+              <span class="font-black text-emerald-400 text-sm">&plusmn; 920 Serangan</span>
+            </div>
+            <div>
+              <span class="text-slate-400 text-[10px] block">Estimasi Waktu Selesai</span>
+              <span class="font-black text-sky-400 text-sm">14 Hari</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Builders Detailed List -->
+        <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+          <h3 class="font-bold text-sm text-white mb-4 flex items-center space-x-2">
+            <i data-lucide="clock" class="w-4 h-4 text-emerald-400"></i>
+            <span>Daftar Upgrade Tukang Berjalan</span>
+          </h3>
+
+          <div class="space-y-3" id="upgradesListContainer">
+            <!-- Builder 1 -->
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center font-black text-sm">B1</div>
+                <div>
+                  <div class="text-sm font-bold text-white">Scattershot &rarr; Level 2</div>
+                  <div class="text-xs text-slate-400">Biaya: 14,500,000 Gold • Ditugaskan: 2 Hari lalu</div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 justify-between sm:justify-end">
+                <div class="text-right">
+                  <span class="text-xs font-mono font-bold text-amber-400 block">Sisa: 01j 14m</span>
+                  <span class="text-[10px] text-slate-500">Estimasi: Hari ini 21:45</span>
+                </div>
+                <button onclick="setReminder('Scattershot Lv 2')" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 transition" title="Ingatkan jika selesai">
+                  <i data-lucide="bell" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Builder 2 -->
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-sm">B2</div>
+                <div>
+                  <div class="text-sm font-bold text-white">Inferno Tower &rarr; Level 7</div>
+                  <div class="text-xs text-slate-400">Biaya: 12,000,000 Gold • Ditugaskan: 4 Hari lalu</div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 justify-between sm:justify-end">
+                <div class="text-right">
+                  <span class="text-xs font-mono font-bold text-amber-400 block">Sisa: 08j 20m</span>
+                  <span class="text-[10px] text-slate-500">Estimasi: Besok 04:50</span>
+                </div>
+                <button onclick="setReminder('Inferno Tower Lv 7')" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 transition" title="Ingatkan jika selesai">
+                  <i data-lucide="bell" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Builder 3 -->
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-sm">B3</div>
+                <div>
+                  <div class="text-sm font-bold text-white">Eagle Artillery &rarr; Level 4</div>
+                  <div class="text-xs text-slate-400">Biaya: 17,000,000 Gold • Ditugaskan: 5 Hari lalu</div>
+                </div>
+              </div>
+              <div class="flex items-center space-x-3 justify-between sm:justify-end">
+                <div class="text-right">
+                  <span class="text-xs font-mono font-bold text-amber-400 block">Sisa: 1 Hari 12j</span>
+                  <span class="text-[10px] text-slate-500">Estimasi: 16 Okt 08:30</span>
+                </div>
+                <button onclick="setReminder('Eagle Artillery Lv 4')" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-amber-400 transition" title="Ingatkan jika selesai">
+                  <i data-lucide="bell" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 5: BATTLE TRACKER & STATISTICS           -->
+      <!-- ============================================== -->
+      <section id="tab-battles" class="tab-pane hidden space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 class="text-xl font-black text-white">Battle Tracker & Statistik</h2>
+            <p class="text-xs text-slate-400">Catatan hasil jarahan, rata-rata loot per jam, & grafik performa farming</p>
+          </div>
+          <button onclick="recordNewAttackModal()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow flex items-center space-x-1.5 transition">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Catat Serangan Manual</span>
+          </button>
+        </div>
+
+        <!-- Stats Overview Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="p-4 rounded-2xl bg-[#131b2e] border border-slate-800">
+            <span class="text-[11px] text-slate-400 font-semibold block">Total Serangan Sesi Ini</span>
+            <div class="text-2xl font-black text-white mt-1" id="statAttackCount">14 Kali</div>
+            <span class="text-[10px] text-emerald-400 font-medium">100% Win Rate (Loot)</span>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#131b2e] border border-slate-800">
+            <span class="text-[11px] text-slate-400 font-semibold block">Rata-Rata Gold / Serangan</span>
+            <div class="text-2xl font-black text-amber-400 mt-1" id="statAvgGold">565,000</div>
+            <span class="text-[10px] text-slate-400 font-medium">Target min: 350K</span>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#131b2e] border border-slate-800">
+            <span class="text-[11px] text-slate-400 font-semibold block">Rata-Rata Elixir / Serangan</span>
+            <div class="text-2xl font-black text-fuchsia-400 mt-1" id="statAvgElixir">540,000</div>
+            <span class="text-[10px] text-slate-400 font-medium">Target min: 350K</span>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-[#131b2e] border border-slate-800">
+            <span class="text-[11px] text-slate-400 font-semibold block">Kecepatan Farming</span>
+            <div class="text-2xl font-black text-sky-400 mt-1">2.4M / Jam</div>
+            <span class="text-[10px] text-slate-400 font-medium">Gold + Elixir Gabungan</span>
+          </div>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+          <h3 class="font-bold text-sm text-white mb-3 flex items-center space-x-2">
+            <i data-lucide="line-chart" class="w-4 h-4 text-emerald-400"></i>
+            <span>Grafik Perolehan Loot 7 Serangan Terakhir</span>
+          </h3>
+          <div class="h-64 w-full">
+            <canvas id="lootChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 6: SESSION MANAGER                        -->
+      <!-- ============================================== -->
+      <section id="tab-session" class="tab-pane hidden space-y-6">
+        <div>
+          <h2 class="text-xl font-black text-white">Session Manager & Anti-Burnout</h2>
+          <p class="text-xs text-slate-400">Atur durasi bermain aman, timer istirahat, & jadwal otomatis</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Live Session Stopwatch -->
+          <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5 text-center flex flex-col justify-center items-center">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Durasi Sesi Berjalan</span>
+            <div class="text-4xl md:text-5xl font-black font-mono text-emerald-400 my-4" id="sessionTimerDisplay">
+              00:42:15
+            </div>
+            
+            <div class="flex items-center space-x-3">
+              <button onclick="toggleSessionTimer()" id="btnSessionToggle" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs shadow flex items-center space-x-1.5 transition">
+                <i data-lucide="pause" class="w-4 h-4"></i>
+                <span id="txtSessionToggle">Jeda Sesi</span>
+              </button>
+              <button onclick="resetSessionTimer()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs transition">
+                Reset
+              </button>
+            </div>
+          </div>
+
+          <!-- Rest Reminder Configuration -->
+          <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5">
+            <h3 class="font-bold text-sm text-white mb-3 flex items-center space-x-2">
+              <i data-lucide="coffee" class="w-4 h-4 text-amber-400"></i>
+              <span>Pengingat Istirahat (Break Reminder)</span>
+            </h3>
+            <p class="text-xs text-slate-400 mb-4">Mencegah kelelahan akun dan menjaga ritme pertempuran tetap natural seperti manusia.</p>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Durasi Istirahat Setiap:</label>
+                <select id="selRestInterval" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-semibold text-sm outline-none">
+                  <option value="30">30 Menit Bermain</option>
+                  <option value="45" selected>45 Menit Bermain (Disarankan)</option>
+                  <option value="60">60 Menit Bermain</option>
+                  <option value="90">90 Menit Bermain</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Lama Waktu Istirahat (Cooldown):</label>
+                <select id="selRestCooldown" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-white font-semibold text-sm outline-none">
+                  <option value="10">10 Menit Rehat</option>
+                  <option value="15" selected>15 Menit Rehat (Disarankan)</option>
+                  <option value="20">20 Menit Rehat</option>
+                </select>
+              </div>
+
+              <button onclick="saveSessionSettings()" class="w-full py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 mt-2 transition">
+                Simpan Jadwal Sesi
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================== -->
+      <!-- TAB 7: SETTINGS & MODEL BISNIS                 -->
+      <!-- ============================================== -->
+      <section id="tab-settings" class="tab-pane hidden space-y-6">
+        <div>
+          <h2 class="text-xl font-black text-white">Pengaturan & Lisensi</h2>
+          <p class="text-xs text-slate-400">Pengaturan aplikasi Kelnara Bot CoC & konfigurasi perangkat</p>
+        </div>
+
+        <div class="rounded-2xl bg-gradient-to-br from-amber-500/20 via-[#131b2e] to-emerald-500/10 border border-amber-500/40 p-5 shadow-xl">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 rounded-2xl bg-amber-500/30 text-amber-400 flex items-center justify-center text-2xl font-black">
+                👑
+              </div>
+              <div>
+                <span class="text-xs font-bold text-amber-400 uppercase tracking-wider">Status Lisensi</span>
+                <h3 class="text-lg font-black text-white">Kelnara Bot CoC — Lifetime Pro Edition</h3>
+                <p class="text-xs text-slate-400">Semua fitur terbuka tanpa batasan waktu & perangkat</p>
+              </div>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold text-xs">
+              AKTIF
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4 pt-4 border-t border-slate-800/80 text-xs text-slate-300">
+            <div>✓ Unlimited Preset Pasukan</div>
+            <div>✓ Auto Zoom-Out 2x Base</div>
+            <div>✓ Auto Panen Tambang</div>
+            <div>✓ 24/7 Cloud Phone Support</div>
+          </div>
+        </div>
+
+        <!-- Data Backup & Reset -->
+        <div class="rounded-2xl bg-[#131b2e] border border-slate-800 p-5 space-y-3">
+          <h3 class="font-bold text-sm text-white flex items-center space-x-2">
+            <i data-lucide="database" class="w-4 h-4 text-sky-400"></i>
+            <span>Cadangan & Pemulihan Data (Backup JSON)</span>
+          </h3>
+          <p class="text-xs text-slate-400">Simpan preset pasukan, riwayat farming, dan target desa Anda ke file JSON atau pulihkan ke perangkat lain.</p>
+          
+          <div class="flex items-center space-x-3 pt-2">
+            <button onclick="exportDataJson()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-white transition flex items-center space-x-1.5">
+              <i data-lucide="download" class="w-4 h-4"></i>
+              <span>Export Konfigurasi</span>
+            </button>
+            <button onclick="document.getElementById('fileImportInput').click()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-300 transition flex items-center space-x-1.5">
+              <i data-lucide="upload" class="w-4 h-4"></i>
+              <span>Import Konfigurasi</span>
+            </button>
+            <input type="file" id="fileImportInput" class="hidden" accept=".json" onchange="importDataJson(event)">
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Bottom Navigation Bar for Mobile (Android) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0c1222]/95 backdrop-blur-lg border-t border-slate-800/80 px-2 py-2 flex justify-around items-center pb-safe">
+    <button onclick="switchTab('dashboard')" class="mobile-nav-btn flex flex-col items-center justify-center p-1.5 text-amber-400 transition" data-tab="dashboard">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <span class="text-[10px] font-bold mt-0.5">Home</span>
+    </button>
+
+    <button onclick="switchTab('farming')" class="mobile-nav-btn flex flex-col items-center justify-center p-1.5 text-slate-400 hover:text-slate-200 transition" data-tab="farming">
+      <i data-lucide="crosshair" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Farming</span>
+    </button>
+
+    <button onclick="switchTab('troops')" class="mobile-nav-btn flex flex-col items-center justify-center p-1.5 text-slate-400 hover:text-slate-200 transition" data-tab="troops">
+      <i data-lucide="users" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Troops</span>
+    </button>
+
+    <button onclick="switchTab('upgrades')" class="mobile-nav-btn flex flex-col items-center justify-center p-1.5 text-slate-400 hover:text-slate-200 transition" data-tab="upgrades">
+      <i data-lucide="hammer" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Upgrades</span>
+    </button>
+
+    <button onclick="switchTab('battles')" class="mobile-nav-btn flex flex-col items-center justify-center p-1.5 text-slate-400 hover:text-slate-200 transition" data-tab="battles">
+      <i data-lucide="swords" class="w-5 h-5"></i>
+      <span class="text-[10px] font-semibold mt-0.5">Stats</span>
+    </button>
+  </nav>
+
+  <!-- Modal: Floating Bot Guide & Quick Run -->
+  <div id="modalFloating" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+    <div class="bg-[#131b2e] border border-emerald-500/40 rounded-2xl max-w-md w-full p-5 shadow-2xl relative">
+      <button onclick="closeFloatingModal()" class="absolute right-4 top-4 text-slate-400 hover:text-white">✕</button>
+      
+      <div class="flex items-center space-x-3 mb-3">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-lg">
+          📱
+        </div>
+        <div>
+          <h3 class="font-extrabold text-white text-base">Kelnara Floating Overlay</h3>
+          <p class="text-xs text-slate-400">Redfinger Cloud Phone & Android Native</p>
+        </div>
+      </div>
+
+      <div class="space-y-3 text-xs text-slate-300 bg-slate-900/80 p-3.5 rounded-xl border border-slate-800">
+        <div class="flex items-start space-x-2">
+          <span class="font-bold text-emerald-400">1.</span>
+          <span>Buka aplikasi <strong>AutoX.js</strong> di Cloud Phone Anda.</span>
+        </div>
+        <div class="flex items-start space-x-2">
+          <span class="font-bold text-emerald-400">2.</span>
+          <span>Buka daftar file, pilih <strong>kelnara_bot.js</strong>.</span>
+        </div>
+        <div class="flex items-start space-x-2">
+          <span class="font-bold text-emerald-400">3.</span>
+          <span>Klik tombol <strong>Play (▶)</strong> di samping nama file untuk memunculkan widget melayang!</span>
+        </div>
+        <div class="flex items-start space-x-2">
+          <span class="font-bold text-emerald-400">4.</span>
+          <span>Widget otomatis mengeksekusi <em>Auto Panen</em>, <em>Latih Barch</em>, <em>Auto Zoom-Out 2x</em>, dan <em>Perimeter Attack</em>.</span>
+        </div>
+      </div>
+
+      <div class="mt-4 flex items-center space-x-2">
+        <button onclick="copyBotScriptPath()" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition">
+          Salin Lokasi Skrip
+        </button>
+        <button onclick="closeFloatingModal()" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs">
+          Tutup
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

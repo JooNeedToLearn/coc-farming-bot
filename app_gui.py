@@ -62,7 +62,7 @@ class CoCBotApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title("CoC Auto Farm Pro - Desktop Dashboard")
+        self.title("Kelnara Bot CoC - Smart Farming, Easy Progress")
         self.geometry("980x700")
         self.minsize(880, 600)
 
@@ -81,7 +81,7 @@ class CoCBotApp(ctk.CTk):
 
         # Initial Tab
         self.select_tab("home")
-        self.append_log("Aplikasi siap. Silakan klik 'Cek Koneksi' di menu Kalibrasi atau langsung 'Mulai Bot'.")
+        self.append_log("Aplikasi siap. Kelnara Bot CoC siap beroperasi.")
 
     def _build_sidebar(self):
         self.sidebar_frame = ctk.CTkFrame(self, width=220, corner_radius=0)
@@ -90,14 +90,14 @@ class CoCBotApp(ctk.CTk):
 
         # Header Title
         title_lbl = ctk.CTkLabel(
-            self.sidebar_frame, text="⚔️ CoC Bot Pro",
+            self.sidebar_frame, text="⚔️ Kelnara Bot CoC",
             font=ctk.CTkFont(size=20, weight="bold")
         )
         title_lbl.grid(row=0, column=0, padx=20, pady=(20, 5))
 
         subtitle_lbl = ctk.CTkLabel(
-            self.sidebar_frame, text="Smart Farming System",
-            font=ctk.CTkFont(size=12), text_color="gray"
+            self.sidebar_frame, text="Smart Farming, Easy Progress",
+            font=ctk.CTkFont(size=11), text_color="gray"
         )
         subtitle_lbl.grid(row=1, column=0, padx=20, pady=(0, 20))
 

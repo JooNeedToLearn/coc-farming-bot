@@ -1,60 +1,80 @@
 /**
- * ⚔️ CoC Auto Farm Pro - Redfinger Cloud Phone Edition
- * Dilengkapi pengecekan otomatis izin Floating Window & Aksesibilitas.
+ * ============================================================================
+ * ⚔️ KELNARA BOT CoC (coc_bot.js) — Smart Farming, Easy Progress
+ * Platform: Android Native / Redfinger Cloud Phone Edition
+ * ============================================================================
+ * 
+ * 📌 PANDUAN MENJALANKAN DI AUTODETEKSI / CLOUD PHONE:
+ * 1. Buka aplikasi AutoX.js di Cloud Phone / Android Anda.
+ * 2. Di halaman utama (Daftar File / 管理), cari file ini.
+ * 3. Klik tombol ▶ (Play) di SEBELAH KANAN nama file tersebut.
+ *    (Catatan: Jangan menekan tombol run di dalam editor teks Monaco agar tidak
+ *     muncul pesan "暂不支持!").
+ * 4. Berikan izin "Tampilkan di atas aplikasi lain" & "Aksesibilitas" jika diminta.
+ * 5. Floating widget Kelnara Bot CoC akan langsung muncul di atas layar game CoC!
+ * ============================================================================
  */
 
-// 1. Cek & Minta Izin Floating Window (Tampilkan di atas aplikasi lain)
+// 1. Cek & Minta Izin Floating Window (Overlay di atas game)
 if (!floaty.checkPermission()) {
-    toastLog("⚠️ Harap aktifkan izin 'Tampilkan di atas aplikasi lain' untuk AutoX");
+    toastLog("⚠️ Harap aktifkan izin 'Tampilkan di atas aplikasi lain' untuk Kelnara Bot");
     floaty.requestPermission();
     sleep(2000);
 }
 
-// Konfigurasi Default Bot
+// Konfigurasi Default Kelnara Bot
 var config = {
-    minGold: 200000,
-    minElixir: 200000,
-    maxSearches: 30,
+    minGold: 350000,
+    minElixir: 350000,
+    minDe: 3000,
+    maxSearches: 35,
+    autoZoom: true,
     enableAutoClaim: true,
     isRunning: false
 };
 
 var botThread = null;
 
-// 2. Tampilan Floating Widget (Bisa Digeser / Draggable)
+// 2. Tampilan Floating Widget Kelnara (Bisa Digeser / Draggable)
 var window = floaty.window(
-    <frame id="mainFrame" bg="#1e1e1e" alpha="0.95" w="auto" h="auto" padding="10" cornerRadius="14">
+    <frame id="mainFrame" bg="#0f172a" alpha="0.95" w="auto" h="auto" padding="12" cornerRadius="16">
         <vertical>
+            {/* Header Widget */}
             <horizontal id="headerBar" gravity="center_vertical">
-                <text text="⚔️ CoC Bot Pro" textSize="13sp" textStyle="bold" textColor="#10b981" />
-                <text text=" (Geser)" textSize="9sp" textColor="#888888" marginLeft="4" />
+                <text text="⚔️ KELNARA BOT" textSize="13sp" textStyle="bold" textColor="#f59e0b" />
+                <text text=" (Geser)" textSize="9sp" textColor="#94a3b8" marginLeft="4" />
                 <button id="btn_close" text="✕" w="28" h="28" textSize="11sp" textColor="#ef4444" style="Widget.AppCompat.Button.Borderless" />
             </horizontal>
             
-            <text id="txt_status" text="Status: IDLE (Siap)" textSize="11sp" textColor="#60a5fa" gravity="center" marginTop="3" />
+            {/* Status Bot */}
+            <text id="txt_status" text="Status: IDLE (Siap Farming)" textSize="11sp" textColor="#38bdf8" gravity="center" marginTop="4" />
             
+            {/* Input Min Gold & Elixir */}
             <horizontal marginTop="6" gravity="center_vertical">
                 <text text="Min Gold (k):" textSize="11sp" textColor="#ffffff" />
-                <input id="inp_gold" text="200" w="65" textSize="11sp" inputType="number" textColor="#ffffff" />
+                <input id="inp_gold" text="350" w="65" textSize="11sp" inputType="number" textColor="#f59e0b" textStyle="bold" />
             </horizontal>
             
             <horizontal gravity="center_vertical">
                 <text text="Min Elixir (k):" textSize="11sp" textColor="#ffffff" />
-                <input id="inp_elixir" text="200" w="65" textSize="11sp" inputType="number" textColor="#ffffff" />
+                <input id="inp_elixir" text="350" w="65" textSize="11sp" inputType="number" textColor="#d946ef" textStyle="bold" />
             </horizontal>
             
+            {/* Checkbox Fitur */}
             <checkbox id="chk_claim" text="Auto Panen Tambang" textSize="11sp" textColor="#ffffff" checked="true" marginTop="2" />
+            <checkbox id="chk_zoom" text="Auto Zoom-Out 2x" textSize="11sp" textColor="#ffffff" checked="true" />
             
+            {/* Tombol Aksi */}
             <horizontal marginTop="8" gravity="center">
-                <button id="btn_toggle" text="▶ MULAI" w="85" h="38" bg="#10b981" textColor="#ffffff" textStyle="bold" />
-                <button id="btn_hide" text="Tutup" w="85" h="38" bg="#3b82f6" textColor="#ffffff" marginLeft="6" />
+                <button id="btn_toggle" text="▶ MULAI" w="88" h="38" bg="#10b981" textColor="#ffffff" textStyle="bold" />
+                <button id="btn_hide" text="Sembunyikan" w="88" h="38" bg="#334155" textColor="#ffffff" marginLeft="6" />
             </horizontal>
         </vertical>
     </frame>
 );
 
 window.setPosition(40, 80);
-toastLog("✅ Menu Bot CoC Berhasil Muncul!");
+toastLog("✅ Kelnara Bot CoC Siap Melayang di Atas Game!");
 
 // Fitur Drag & Drop untuk Menggeser Floating Window
 var touchStartX = 0, touchStartY = 0;
@@ -85,7 +105,7 @@ window.btn_close.click(function() {
 });
 
 window.btn_hide.click(function() {
-    toast("Bot tetap jalan. Buka AutoX.js jika ingin memunculkan menu.");
+    toast("Kelnara Bot tetap berjalan. Buka AutoX.js untuk memunculkan kembali.");
 });
 
 window.btn_toggle.click(function() {
@@ -104,9 +124,8 @@ function updateStatus(text, color) {
 }
 
 function startBot() {
-    // Memastikan izin Aksesibilitas aktif saat tombol Mulai ditekan
     if (auto.service == null) {
-        toastLog("⚠️ Membuka pengaturan... Aktifkan Layanan Aksesibilitas untuk AutoX");
+        toastLog("⚠️ Buka Aksesibilitas... Aktifkan Layanan Aksesibilitas untuk AutoX");
         app.startActivity({
             action: "android.settings.ACCESSIBILITY_SETTINGS"
         });
@@ -114,9 +133,10 @@ function startBot() {
     }
 
     config.isRunning = true;
-    config.minGold = parseInt(window.inp_gold.getText().toString()) * 1000 || 200000;
-    config.minElixir = parseInt(window.inp_elixir.getText().toString()) * 1000 || 200000;
+    config.minGold = (parseInt(window.inp_gold.getText().toString()) || 350) * 1000;
+    config.minElixir = (parseInt(window.inp_elixir.getText().toString()) || 350) * 1000;
     config.enableAutoClaim = window.chk_claim.isChecked();
+    config.autoZoom = window.chk_zoom.isChecked();
 
     ui.run(function() {
         window.btn_toggle.setText("⏹ STOP");
@@ -124,10 +144,10 @@ function startBot() {
     });
 
     updateStatus("Farming Aktif...", "#10b981");
-    toast("⚔️ CoC Bot Dimulai!");
+    toast("⚔️ Kelnara Bot CoC Dimulai!");
 
     botThread = threads.start(function() {
-        mainBotLoop();
+        kelnaraMainLoop();
     });
 }
 
@@ -141,19 +161,19 @@ function stopBot() {
         window.btn_toggle.attr("bg", "#10b981");
     });
     updateStatus("IDLE (Berhenti)", "#f59e0b");
-    toast("⏹ CoC Bot Dihentikan");
+    toast("⏹ Kelnara Bot Dihentikan");
 }
 
 function humanClick(x, y) {
     var jx = x + random(-4, 4);
     var jy = y + random(-4, 4);
     click(jx, jy);
-    sleep(random(700, 1200));
+    sleep(random(650, 1100));
 }
 
-// 3. Gestur Zoom-Out Layar Otomatis
+// 3. Gestur Zoom-Out Layar Otomatis (2x Cubit Masuk)
 function zoomOutScreen(cx, cy) {
-    updateStatus("🔍 Zoom-out Layar...", "#3b82f6");
+    updateStatus("🔍 Zoom-out Layar (2x)...", "#38bdf8");
     for (var i = 0; i < 2; i++) {
         gestures(
             [0, 450, [cx * 0.35, cy * 0.35], [cx * 0.85, cy * 0.85]],
@@ -161,11 +181,11 @@ function zoomOutScreen(cx, cy) {
         );
         sleep(500);
     }
-    sleep(1000);
+    sleep(900);
 }
 
-// 4. Siklus Utama Farming di Cloud Phone
-function mainBotLoop() {
+// 4. Siklus Utama Kelnara Bot Farming di Cloud Phone
+function kelnaraMainLoop() {
     var screenW = Math.max(device.width, device.height);
     var screenH = Math.min(device.width, device.height);
 
@@ -184,7 +204,7 @@ function mainBotLoop() {
         try {
             // A. Panen Kolektor di Desa Utama
             if (config.enableAutoClaim) {
-                updateStatus("Memanen Tambang...", "#3b82f6");
+                updateStatus("Memanen Tambang...", "#38bdf8");
                 var collectors = [
                     [500, 320], [620, 310], [680, 350], [740, 330],
                     [440, 420], [640, 480], [760, 450], [840, 410]
@@ -192,12 +212,12 @@ function mainBotLoop() {
                 for (var i = 0; i < collectors.length; i++) {
                     if (!config.isRunning) break;
                     tapScaled(collectors[i][0], collectors[i][1]);
-                    sleep(150);
+                    sleep(160);
                 }
             }
 
             // B. Latih Pasukan di Barak (Quick Train Preset 1)
-            updateStatus("Melatih Pasukan...", "#3b82f6");
+            updateStatus("Melatih Pasukan...", "#38bdf8");
             tapScaled(60, 620); // Tombol Barak
             sleep(1200);
             tapScaled(1000, 120); // Tab Quick Train
@@ -232,7 +252,7 @@ function mainBotLoop() {
             }
 
             // E. ZOOM-OUT LAYAR SEBELUM MENYERANG
-            if (config.isRunning) {
+            if (config.isRunning && config.autoZoom) {
                 zoomOutScreen(centerX, centerY);
             }
 
@@ -247,7 +267,7 @@ function mainBotLoop() {
                     [220, 420], [160, 360], [220, 280], [440, 200]
                 ];
 
-                // 1. Deploy Pasukan 1 (Barbarian)
+                // 1. Deploy Barbarian (Slot 1)
                 tapScaled(150, 650);
                 sleep(500);
                 for (var p = 0; p < perimeter.length; p++) {
@@ -255,7 +275,7 @@ function mainBotLoop() {
                     sleep(80);
                 }
 
-                // 2. Deploy Pasukan 2 (Archer)
+                // 2. Deploy Archer (Slot 2)
                 tapScaled(220, 650);
                 sleep(500);
                 for (var a = 0; a < perimeter.length; a++) {
@@ -269,7 +289,7 @@ function mainBotLoop() {
 
             // G. Menyerah & Pulang ke Desa
             if (config.isRunning) {
-                updateStatus("Menyerah & Pulang...", "#60a5fa");
+                updateStatus("Menyerah & Pulang...", "#38bdf8");
                 tapScaled(70, 560); // Surrender
                 sleep(1000);
                 tapScaled(720, 440); // Konfirmasi Okay
@@ -279,14 +299,14 @@ function mainBotLoop() {
             }
 
             // H. Istirahat Antar Siklus (45 detik)
-            updateStatus("Cooldown (" + attackCount + "x sukses)...", "#60a5fa");
+            updateStatus("Cooldown (" + attackCount + "x sukses)...", "#38bdf8");
             for (var c = 0; c < 45; c++) {
                 if (!config.isRunning) break;
                 sleep(1000);
             }
 
         } catch (e) {
-            log("Error bot loop: " + e);
+            log("Error Kelnara Loop: " + e);
             sleep(3000);
         }
     }

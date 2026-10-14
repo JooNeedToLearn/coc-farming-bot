@@ -23,3 +23,6 @@ env/
 # OS generated files
 Thumbs.db
 .DS_Store
+
+# Large Android Binaries
+*.apk
