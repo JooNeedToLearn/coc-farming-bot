@@ -1,5 +1,4 @@
 import subprocess
-import numpy as np
 import time
 import os
 import sys
@@ -7,17 +6,23 @@ import shutil
 import io
 from typing import Optional, Tuple, List
 
-# Try importing cv2, fallback to PIL if not installed
+try:
+    import numpy as np
+    HAS_NUMPY = True
+except Exception:
+    HAS_NUMPY = False
+    np = None
+
 try:
     import cv2
-    HAS_CV2 = True
-except ImportError:
+    HAS_CV2 = True and HAS_NUMPY
+except Exception:
     HAS_CV2 = False
 
 try:
     from PIL import Image
     HAS_PIL = True
-except ImportError:
+except Exception:
     HAS_PIL = False
 
 
@@ -29,7 +34,6 @@ class ADBBridge:
         self.is_termux = "TERMUX_VERSION" in os.environ or os.path.exists("/data/data/com.termux")
         self.use_direct_root = False
 
-        # Resolusi path ADB sesuai OS
         if adb_path and os.path.exists(adb_path):
             self.adb_path = adb_path
         elif sys.platform == "win32":
@@ -52,7 +56,6 @@ class ADBBridge:
         return False
 
     def _get_attached_devices(self) -> List[str]:
-        """Queries ADB for currently attached and ready devices."""
         try:
             result = subprocess.run([self.adb_path, "devices"],
                                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=3)
@@ -67,7 +70,6 @@ class ADBBridge:
             return []
 
     def connect(self) -> bool:
-        """Connects to ADB daemon or verifies direct root access on Cloud Phone."""
         if self._check_root():
             print("[ADB] ✅ Terdeteksi mode Root langsung di Termux (Cloud Phone).")
             self.device_id = "local_root"
@@ -100,8 +102,8 @@ class ADBBridge:
             print(f"[ADB] Gagal menghubungkan ke ADB: {e}")
             return False
 
-    def screencap(self) -> Optional[np.ndarray]:
-        """Captures screen directly into memory as an image array."""
+    def screencap(self):
+        """Captures screen directly into memory."""
         if not self.device_id:
             if not self.connect():
                 return None
@@ -117,21 +119,21 @@ class ADBBridge:
             if not raw_png:
                 return None
 
-            if HAS_CV2:
+            if HAS_CV2 and HAS_NUMPY:
                 img_array = np.frombuffer(raw_png, dtype=np.uint8)
                 return cv2.imdecode(img_array, cv2.IMREAD_COLOR)
             elif HAS_PIL:
                 pil_img = Image.open(io.BytesIO(raw_png)).convert("RGB")
-                # Return as BGR numpy array to maintain compatibility
-                rgb_arr = np.array(pil_img)
-                return rgb_arr[:, :, ::-1]
-            return None
+                if HAS_NUMPY:
+                    rgb_arr = np.array(pil_img)
+                    return rgb_arr[:, :, ::-1]
+                return pil_img
+            return raw_png
         except Exception as e:
             print(f"[ADB] Error saat mengambil screencap: {e}")
             return None
 
     def tap(self, x: int, y: int) -> bool:
-        """Sends tap touch event to device coordinates."""
         if not self.device_id:
             if not self.connect():
                 return False
@@ -149,7 +151,6 @@ class ADBBridge:
             return False
 
     def swipe(self, x1: int, y1: int, x2: int, y2: int, duration_ms: int = 300) -> bool:
-        """Sends swipe touch event to device coordinates."""
         if not self.device_id:
             if not self.connect():
                 return False
@@ -170,7 +171,6 @@ class ADBBridge:
             return False
 
     def get_screen_size(self) -> Optional[Tuple[int, int]]:
-        """Returns (width, height) of current emulator/device screen."""
         if not self.device_id:
             if not self.connect():
                 return None
