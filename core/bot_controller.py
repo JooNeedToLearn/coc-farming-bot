@@ -28,7 +28,7 @@ class BotController:
         self.status_cb = status_cb or (lambda s: None)
 
         self.adb = ADBBridge(
-            adb_path=config["emulator"].get("adb_path", r"C:\Program Files\BlueStacks_nxt\HD-Adb.exe"),
+            adb_path=config["emulator"].get("adb_path"),
             host=config["emulator"].get("host", "127.0.0.1"),
             port=config["emulator"].get("port", 5555)
         )
@@ -45,9 +45,9 @@ class BotController:
         # Threading controls
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
-        self.pause_event.set()  # Not paused initially
-        self.thread: Optional[threading.Thread] = None
+        self.pause_event.set()
 
+        self.thread: Optional[threading.Thread] = None
         self.current_state = BotState.IDLE
         self.total_attacks = 0
 
@@ -62,7 +62,6 @@ class BotController:
         self.adb.tap(jx, jy)
 
     def is_interrupted(self) -> bool:
-        """Checks if user requested stop or pause."""
         if self.stop_event.is_set():
             return True
         while not self.pause_event.is_set():
@@ -72,40 +71,33 @@ class BotController:
         return False
 
     def train_army(self):
-        """Clicks army camp icon and trains preset army."""
         self.log("Membuka menu pelatihan pasukan (Train Army)...")
         self.tap_with_jitter(60, 620)
         self.humanizer.sleep_random(1.0, 1.4)
         if self.is_interrupted(): return
 
-        # Tab Quick Train
         self.tap_with_jitter(1000, 120)
         self.humanizer.sleep_random(0.8, 1.1)
         if self.is_interrupted(): return
 
-        # Tombol Train Army Preset 1
         self.tap_with_jitter(1100, 280)
         self.humanizer.sleep_random(0.8, 1.1)
 
-        # Tutup jendela
         self.tap_with_jitter(1180, 80)
         self.humanizer.sleep_random(0.8, 1.2)
 
     def find_match(self):
-        """Clicks Attack button and initiates matchmaking."""
         self.log("Membuka menu penyerangan (Attack)...")
         self.tap_with_jitter(75, 630)
         self.humanizer.sleep_random(1.2, 1.6)
         if self.is_interrupted(): return
 
-        # Tombol Find A Match
         self.log("Mencari lawan...")
         self.tap_with_jitter(950, 520)
         self.humanizer.sleep_random(3.2, 4.2)
         self.current_state = BotState.SCOUTING
 
     def scout_base(self, min_gold: int, min_elixir: int, max_searches: int, search_idx: int) -> bool:
-        """Inspects current base loot and decides whether to attack or next."""
         screen = self.adb.screencap()
         if screen is None:
             return False
@@ -116,7 +108,6 @@ class BotController:
 
         self.log(f"Base #{search_idx} -> Terbaca Gold: {gold:,} | Elixir: {elixir:,}")
 
-        # Kondisi target terpenuhi atau batas search habis
         if (gold >= min_gold and elixir >= min_elixir) or (search_idx >= max_searches):
             self.log(f"🎯 Target loot terpenuhi! Mempersiapkan penyerangan...")
             self.current_state = BotState.ATTACKING
@@ -128,22 +119,19 @@ class BotController:
             return False
 
     def finish_battle(self):
-        """Surrenders, confirms, and returns to village."""
         self.log("Pertempuran selesai. Menyerah (Surrender) & Pulang...")
         self.tap_with_jitter(70, 560)
         self.humanizer.sleep_random(0.8, 1.2)
 
-        # Konfirmasi Okay
         self.tap_with_jitter(720, 440)
         self.humanizer.sleep_random(2.0, 2.8)
 
-        # Return Home
         self.tap_with_jitter(640, 600)
         self.humanizer.sleep_random(3.0, 4.0)
         self.current_state = BotState.VILLAGE
 
     def _worker_loop(self):
-        """Main execution loop running in background thread."""
+        """Main execution loop."""
         self.log("=== Bot Berjalan (Active) ===")
         self.status_cb("Running")
 
@@ -158,52 +146,43 @@ class BotController:
         enable_claim = farming_cfg.get("enable_auto_claim", True)
         enable_wall = farming_cfg.get("enable_auto_wall", False)
 
-        # Verifikasi koneksi ADB terlebih dahulu
         if not self.adb.connect():
-            self.log("❌ Gagal terhubung ke BlueStacks. Pastikan emulator menyala.")
+            self.log("❌ Gagal terhubung ke emulator/device.")
             self.status_cb("Error")
             return
 
         while not self.stop_event.is_set():
             if self.is_interrupted(): break
 
-            # 1. Rutinitas Desa Utama
             if enable_home:
                 self.log(f"\n--- Memulai Siklus Penyerangan #{self.total_attacks + 1} ---")
 
-                # Auto Claim Collector
                 if enable_claim:
                     self.village.claim_collectors()
                     if self.is_interrupted(): break
 
-                # Auto Upgrade Wall
                 if enable_wall:
                     self.village.upgrade_wall()
                     if self.is_interrupted(): break
 
-                # Train Army
                 self.train_army()
                 if self.is_interrupted(): break
 
-                # Cari Match
                 self.find_match()
                 if self.is_interrupted(): break
 
-                # Scouting loop
                 search_idx = 1
                 matched = False
                 while not matched and search_idx <= max_searches and not self.is_interrupted():
                     matched = self.scout_base(min_gold, min_elixir, max_searches, search_idx)
                     search_idx += 1
 
-                # Eksekusi Serangan jika target cocok
                 if matched and not self.is_interrupted():
                     self.strategy.execute_attack(cycles=2)
                     self.finish_battle()
                     self.total_attacks += 1
                     self.log(f"✅ Total serangan sukses: {self.total_attacks}/{max_attacks}")
 
-            # 2. Rutinitas Desa Malam (Builder Base) jika diaktifkan
             if enable_builder and not self.is_interrupted():
                 self.log("\n--- Menjalankan Rutinitas Desa Malam ---")
                 self.builder.switch_to_builder_base()
@@ -212,22 +191,26 @@ class BotController:
                     self.builder.execute_builder_attack()
                     self.builder.switch_to_home_village()
 
-            # 3. Cek batasan Auto Stop Bot
             if self.total_attacks >= max_attacks:
                 self.log(f"🛑 Batas maksimum serangan ({max_attacks}) tercapai. Menghentikan bot secara otomatis.")
                 break
 
-            # Cooldown antar siklus (misal: 60 - 90 detik)
             self.log("Menunggu istirahat antar siklus (cooldown)...")
-            for _ in range(60):
+            for _ in range(45):
                 if self.is_interrupted(): break
                 time.sleep(1)
 
         self.log("=== Bot Dihentikan (Stopped) ===")
         self.status_cb("Stopped")
 
+    def run_one_cycle(self):
+        """Runs the bot loop directly in CLI/Termux foreground."""
+        try:
+            self._worker_loop()
+        except KeyboardInterrupt:
+            self.stop()
+
     def start(self):
-        """Starts the bot in background thread."""
         if self.thread and self.thread.is_alive():
             return
         self.stop_event.clear()
@@ -236,7 +219,6 @@ class BotController:
         self.thread.start()
 
     def pause(self):
-        """Toggles pause/resume state."""
         if self.pause_event.is_set():
             self.pause_event.clear()
             self.log("⏸ Bot dijeda (Paused).")
@@ -247,7 +229,6 @@ class BotController:
             self.status_cb("Running")
 
     def stop(self):
-        """Stops the bot gracefully."""
         self.stop_event.set()
         self.pause_event.set()
         self.log("Meminta penghentian bot...")
