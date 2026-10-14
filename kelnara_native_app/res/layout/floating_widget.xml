@@ -51,20 +51,21 @@
         android:textColor="@color/brand_cyan"
         android:textSize="10sp"
         android:gravity="center"
-        android:layout_marginTop="4dp" />
+        android:layout_marginTop="3dp" />
 
-    <!-- Action Buttons -->
+    <!-- Main Farming Controls -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_marginTop="6dp">
 
         <Button
             android:id="@+id/btn_float_toggle"
-            android:layout_width="85dp"
+            android:layout_width="0dp"
             android:layout_height="36dp"
-            android:text="▶ MULAI"
+            android:layout_weight="1"
+            android:text="▶ MULAI FARM"
             android:textSize="11sp"
             android:textColor="@color/text_white"
             android:textStyle="bold"
@@ -72,12 +73,52 @@
 
         <Button
             android:id="@+id/btn_float_hide"
-            android:layout_width="85dp"
+            android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:text="Minimize"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textColor="@color/text_white"
             android:backgroundTint="#334155"
-            android:layout_marginStart="6dp" />
+            android:layout_marginStart="4dp" />
+    </LinearLayout>
+
+    <!-- Manual Quick Assist Controls -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="4dp">
+
+        <Button
+            android:id="@+id/btn_quick_battle"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:text="🎯 Battle"
+            android:textSize="9sp"
+            android:textColor="@color/text_white"
+            android:backgroundTint="#1e293b" />
+
+        <Button
+            android:id="@+id/btn_quick_next"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:text="⏭ Next"
+            android:textSize="9sp"
+            android:textColor="@color/text_white"
+            android:backgroundTint="#1e293b"
+            android:layout_marginStart="3dp" />
+
+        <Button
+            android:id="@+id/btn_quick_zoom"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:text="🔍 Zoom"
+            android:textSize="9sp"
+            android:textColor="@color/text_white"
+            android:backgroundTint="#1e293b"
+            android:layout_marginStart="3dp" />
     </LinearLayout>
 </LinearLayout>

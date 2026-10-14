@@ -19,9 +19,7 @@ public class CoCAccessibilityService extends AccessibilityService {
     }
 
     @Override
-    public void onAccessibilityEvent(AccessibilityEvent event) {
-        // Event listener
-    }
+    public void onAccessibilityEvent(AccessibilityEvent event) {}
 
     @Override
     public void onInterrupt() {
@@ -40,8 +38,10 @@ public class CoCAccessibilityService extends AccessibilityService {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) return false;
         Path clickPath = new Path();
         clickPath.moveTo(x, y);
+        clickPath.lineTo(x + 1, y + 1); // Wajib agar Android mendaftarkan stroke gerakan
+
         GestureDescription.StrokeDescription stroke =
-                new GestureDescription.StrokeDescription(clickPath, 0, 50);
+                new GestureDescription.StrokeDescription(clickPath, 0, 100); // 100ms untuk Supercell game engine
         GestureDescription.Builder builder = new GestureDescription.Builder();
         builder.addStroke(stroke);
         return dispatchGesture(builder.build(), null, null);
@@ -59,9 +59,9 @@ public class CoCAccessibilityService extends AccessibilityService {
         finger2.lineTo(cx * 1.15f, cy * 1.15f);
 
         GestureDescription.StrokeDescription stroke1 =
-                new GestureDescription.StrokeDescription(finger1, 0, 400);
+                new GestureDescription.StrokeDescription(finger1, 0, 450);
         GestureDescription.StrokeDescription stroke2 =
-                new GestureDescription.StrokeDescription(finger2, 0, 400);
+                new GestureDescription.StrokeDescription(finger2, 0, 450);
 
         GestureDescription.Builder builder = new GestureDescription.Builder();
         builder.addStroke(stroke1);

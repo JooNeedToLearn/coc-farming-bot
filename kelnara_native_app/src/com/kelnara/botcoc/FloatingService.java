@@ -68,6 +68,10 @@ public class FloatingService extends Service {
         Button btnHide = floatingView.findViewById(R.id.btn_float_hide);
         TextView btnClose = floatingView.findViewById(R.id.btn_close_float);
 
+        Button btnQuickBattle = floatingView.findViewById(R.id.btn_quick_battle);
+        Button btnQuickNext = floatingView.findViewById(R.id.btn_quick_next);
+        Button btnQuickZoom = floatingView.findViewById(R.id.btn_quick_zoom);
+
         // Dragging listener
         dragHeader.setOnTouchListener(new View.OnTouchListener() {
             private int initialX, initialY;
@@ -114,9 +118,22 @@ public class FloatingService extends Service {
                 btnToggle.setBackgroundColor(0xFFEF4444);
             } else {
                 engine.stop();
-                btnToggle.setText("▶ MULAI");
+                btnToggle.setText("▶ MULAI FARM");
                 btnToggle.setBackgroundColor(0xFF10B981);
             }
+        });
+
+        // Quick Manual Actions
+        btnQuickBattle.setOnClickListener(v -> {
+            FarmingEngine.getInstance().manualTestBattle(this);
+        });
+
+        btnQuickNext.setOnClickListener(v -> {
+            FarmingEngine.getInstance().manualNext(this);
+        });
+
+        btnQuickZoom.setOnClickListener(v -> {
+            FarmingEngine.getInstance().manualZoom(this);
         });
 
         // Status listener
