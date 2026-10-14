@@ -1,0 +1,27 @@
+# Configuration for Clash of Clans Auto Farming Bot
+emulator:
+  adb_path: "C:\\Program Files\\BlueStacks_nxt\\HD-Adb.exe"
+  host: "127.0.0.1"
+  port: 5555
+  device_id: "127.0.0.1:5555" # or "emulator-5554"
+  target_resolution: [1280, 720]
+
+farming:
+  # Minimum loot requirements to trigger attack (in thousands, e.g. 250000)
+  min_gold: 200000
+  min_elixir: 200000
+  min_dark_elixir: 0
+  max_search_count: 50 # Max Next clicks before forced attack or village return
+
+humanizer:
+  enable_jitter: true
+  coordinate_variance: 5 # pixels (+- gaussian jitter)
+  min_delay: 0.8 # seconds
+  max_delay: 1.6 # seconds
+  session_break_interval: 1800 # 30 minutes
+  session_break_duration: 300 # 5 minutes
+
+strategy:
+  type: "barch_perimeter" # "barch_perimeter" or "dead_base_collector"
+  wave_delay: 0.3
+  deploy_cycles: 3

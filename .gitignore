@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment and sensitive files
+.env
+*.token
+*.key
+*.secret
+
+# Screenshots / test images
+*.png
+*.jpg
+*.jpeg
+!assets/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# OS generated files
+Thumbs.db
+.DS_Store
