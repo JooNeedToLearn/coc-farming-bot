@@ -97,7 +97,7 @@ cmd_d8 = [
     "com.android.tools.r8.D8",
     "--output", DEX_DIR,
     "--lib", ANDROID_JAR,
-    "--min-api", "24"
+    "--min-api", "21"
 ] + class_files
 
 res = subprocess.run(cmd_d8, capture_output=True, text=True)
@@ -106,38 +106,34 @@ if res.returncode != 0:
     sys.exit(1)
 print("classes.dex resmi berhasil dibuat!")
 
-# 5. Pack classes.dex into APK and Sign
-print("\n[5/5] Memasukkan classes.dex ke APK & menandatangani secara resmi...")
+# 5. Pack classes.dex into APK and Sign with Google apksig (v1 + v2 + v3)
+print("\n[5/5] Memasukkan classes.dex ke APK & menandatangani dengan Google apksig (v1 + v2 + v3)...")
 classes_dex = os.path.join(DEX_DIR, "classes.dex")
 with zipfile.ZipFile(BASE_APK, "a", compression=zipfile.ZIP_DEFLATED) as z:
     z.write(classes_dex, "classes.dex")
 
-# Sign with jarsigner
+# Sign with SignTool (official Google apksig library)
+SIGNED_TEMP_APK = os.path.join(WORK_DIR, "signed.apk")
 cmd_sign = [
-    "jarsigner",
-    "-sigalg", "SHA256withRSA",
-    "-digestalg", "SHA-256",
-    "-keystore", KEYSTORE,
-    "-storepass", "kelnara123",
-    "-keypass", "kelnara123",
+    "java", "-cp", f"apksig.jar;{BASE_DIR}",
+    "SignTool",
     BASE_APK,
+    SIGNED_TEMP_APK,
+    KEYSTORE,
+    "kelnara123",
     "kelnara"
 ]
-res = subprocess.run(cmd_sign, capture_output=True, text=True)
+res = subprocess.run(cmd_sign, capture_output=True, text=True, cwd=BASE_DIR)
 if res.returncode != 0:
-    print("Error jarsigner:", res.stderr)
+    print("Error apksig SignTool:", res.stderr)
     sys.exit(1)
-
-# Verify
-cmd_verify = ["jarsigner", "-verify", BASE_APK]
-res_v = subprocess.run(cmd_verify, capture_output=True, text=True)
-print("Status verifikasi signature:", res_v.stdout.strip())
+print(res.stdout.strip())
 
 # Copy to final destinations
-shutil.copyfile(BASE_APK, FINAL_APK)
+shutil.copyfile(SIGNED_TEMP_APK, FINAL_APK)
 print(f"\n✅ APK BERHASIL DIBUAT: {FINAL_APK}")
 if os.path.exists(os.path.dirname(DESKTOP_APK)):
-    shutil.copyfile(BASE_APK, DESKTOP_APK)
+    shutil.copyfile(SIGNED_TEMP_APK, DESKTOP_APK)
     print(f"✅ APK JUGA DISALIN KE DESKTOP: {DESKTOP_APK}")
 
 size_mb = os.path.getsize(FINAL_APK) / (1024 * 1024)
